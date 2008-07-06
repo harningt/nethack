@@ -305,6 +305,9 @@ register int fd, mode;
 	bwrite(fd, (genericptr_t) &quest_status, sizeof(struct q_score));
 	bwrite(fd, (genericptr_t) spl_book,
 				sizeof(struct spell) * (MAXSPELL + 1));
+#ifdef BRADS_PIT
+	bwrite(fd, (genericptr_t) &brads_pit, sizeof brads_pit);
+#endif
 	save_artifacts(fd);
 	save_oracles(fd, mode);
 	if(ustuck_id)

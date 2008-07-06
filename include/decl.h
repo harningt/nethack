@@ -212,6 +212,12 @@ E NEARDATA struct dig_info {		/* apply.c, hack.c */
 
 E NEARDATA long moves, monstermoves;
 E NEARDATA long wailmsg;
+#ifdef BRADS_PIT
+E NEARDATA struct brds_pt {
+    int created;
+    int found;
+} brads_pit;
+#endif
 
 E NEARDATA boolean in_mklev;
 E NEARDATA boolean stoned;

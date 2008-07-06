@@ -428,6 +428,9 @@ unsigned int *stuckid, *steedid;	/* STEED */
 	mread(fd, (genericptr_t) &quest_status, sizeof(struct q_score));
 	mread(fd, (genericptr_t) spl_book,
 				sizeof(struct spell) * (MAXSPELL + 1));
+#ifdef BRADS_PIT
+	mread(fd, (genericptr_t) &brads_pit, sizeof brads_pit);
+#endif
 	restore_artifacts(fd);
 	restore_oracles(fd);
 	if (u.ustuck)

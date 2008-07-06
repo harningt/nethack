@@ -219,7 +219,7 @@ xchar x, y;
 	return((struct engr *) 0);
 }
 
-#ifdef ELBERETH
+#if defined(ELBERETH) || defined(BRADS_PIT)
 /* Decide whether a particular string is engraved at a specified
  * location; a case-insensitive substring match used.
  * Ignore headstones, in case the player names herself "Elbereth".

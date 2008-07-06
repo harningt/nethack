@@ -303,6 +303,15 @@ register int x, y, typ;
 			       level.flags.is_cavernous_lev ? CORR : DOOR;
 
 		unearth_objs(x, y);
+#ifdef BRADS_PIT
+		if ((typ == PIT)&&(!brads_pit.created)) {
+    		    lev = &levl[x][y];
+		    if ((IS_ROOM(lev->typ))&&(!In_sokoban(&u.uz))&&(rnd(10)<depth(&u.uz))) {
+			make_engr_at(x,y,BRADS_TEXT,0L,ENGRAVE);
+			brads_pit.created=TRUE;
+		    }
+		}
+#endif
 		break;
 	}
 	if (ttmp->ttyp == HOLE) ttmp->tseen = 1;  /* You can't hide a hole */
@@ -590,6 +599,9 @@ unsigned trflags;
 	boolean already_seen = trap->tseen;
 	boolean webmsgok = (!(trflags & NOWEBMSG));
 	boolean forcebungle = (trflags & FORCEBUNGLE);
+#ifdef BRADS_PIT
+	struct engr *ep;
+#endif
 
 	nomul(0);
 
@@ -933,6 +945,22 @@ glovecheck:		(void) rust_dmg(uarmg, "gauntlets", 1, TRUE, &youmonst);
 		    ballfall();
 		    placebc();
 		}
+#ifdef BRADS_PIT
+		if ((ep=engr_at(u.ux,u.uy))&&(strstri(ep->engr_txt,BRADS_TEXT) != 0)) {
+		    if ((ep->engr_time==0)&&(ep->engr_type==ENGRAVE)) {
+			if (!brads_pit.found) {
+			    pline("Oh look! It's Brad's Pit!");
+			    brads_pit.found=TRUE;
+			    change_luck(1);
+			}
+		    } else {
+			if (!brads_pit.found) {
+			    brads_pit.found=TRUE;
+			    pline("Pity.  You might have got lucky.");
+			}
+		    } 
+		}
+#endif		
 		selftouch("Falling, you");
 		vision_full_recalc = 1;	/* vision limits change */
 		exercise(A_STR, FALSE);

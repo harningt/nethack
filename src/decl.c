@@ -188,6 +188,9 @@ NEARDATA struct spell spl_book[MAXSPELL + 1] = {DUMMY};
 NEARDATA long moves = 1L, monstermoves = 1L;
 	 /* These diverge when player is Fast */
 NEARDATA long wailmsg = 0L;
+#ifdef BRADS_PIT
+NEARDATA struct brds_pt brads_pit = { FALSE, FALSE };
+#endif
 
 /* objects that are moving to another dungeon level */
 NEARDATA struct obj *migrating_objs = (struct obj *)0;
