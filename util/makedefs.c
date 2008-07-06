@@ -69,6 +69,8 @@ static	const char	SCCS_Id[] = "@(#)makedefs.c\t3.4\t2002/02/03";
 #define QTXT_O_FILE	"quest.dat"
 #define VIS_TAB_H	"vis_tab.h"
 #define VIS_TAB_C	"vis_tab.c"
+#define DGN_CHAR_IN	"dgn_char.in"
+#define DGN_CHAR	"dgn_char.h"
 	/* locations for those files */
 #ifdef AMIGA
 # define FILE_PREFIX
@@ -157,6 +159,7 @@ void NDECL(do_questtxt);
 void NDECL(do_rumors);
 void NDECL(do_oracles);
 void NDECL(do_vision);
+void NDECL(do_dgnchar);
 
 extern void NDECL(monst_init);		/* monst.c */
 extern void NDECL(objects_init);	/* objects.c */
@@ -310,7 +313,9 @@ char	*options;
 		case 'z':
 		case 'Z':	do_vision();
 				break;
-
+		case 'c':
+		case 'C':	do_dgnchar();
+				break;
 		default:	Fprintf(stderr,	"Unknown option '%c'.\n",
 					*options);
 				(void) fflush(stderr);
@@ -2189,6 +2194,111 @@ clear_path(you_row,you_col,y2,x2)
 }
 #endif /* VISION_TABLES */
 
+typedef struct {
+	char *name;
+	void *next;
+	int count_start;
+	int count;
+} dgnchar_count;
+
+void
+do_dgnchar()
+{
+	char *infile;
+	char char_name[80];
+	char *char_comment;
+	char *char_comment_end;
+	int  counter;
+	int  spc_cnt;
+	dgnchar_count *dgn_counter_start;
+	dgnchar_count *dgn_counter_use;
+	int  counter_closing;
+	
+	filename[0]='\0';
+	Sprintf(filename, INCLUDE_TEMPLATE, DGN_CHAR);
+
+	infile = malloc(strlen(filename) - strlen(DGN_CHAR) + strlen(DGN_CHAR_IN) + 1);
+	Sprintf(infile, INCLUDE_TEMPLATE, DGN_CHAR_IN);
+
+	if (!(ofp = fopen(filename, WRTMODE))) {
+		perror(filename);
+		exit(EXIT_FAILURE);
+	}
+
+	if (!(ifp = fopen(infile, RDTMODE))) {
+		perror(infile);
+		Fclose(ofp);
+		Unlink(filename);       /* kill empty output file */
+		exit(EXIT_FAILURE);
+	}
+	counter=0;
+	dgn_counter_start=NULL;
+	while (fgets(in_line,sizeof in_line, ifp)) {
+		if ((*in_line == '#') || (*in_line == '\n') || (*in_line == '\t') || (*in_line == ' ')) {
+			continue;
+		}
+
+		if (*in_line == '.') {
+			sscanf(in_line,".%s",char_name);
+			dgn_counter_use=dgn_counter_start;
+			counter_closing=FALSE;
+			while (dgn_counter_use&&(!counter_closing)) {
+				if (!strcmp(char_name,dgn_counter_use->name)) {
+					dgn_counter_use->count=counter-dgn_counter_use->count_start;
+					fprintf(ofp,"/* end counter %s */\n",char_name);
+					counter_closing=TRUE;
+					continue;
+				}
+				dgn_counter_use=dgn_counter_use->next;
+			}
+			if (!counter_closing) {
+				if (!dgn_counter_start) {
+					dgn_counter_start=malloc(sizeof(dgnchar_count));
+					dgn_counter_use=dgn_counter_start;
+				} else {
+					dgn_counter_use=dgn_counter_start;
+					while (dgn_counter_use->next) dgn_counter_use=dgn_counter_use->next;
+					dgn_counter_use->next=malloc(sizeof(dgnchar_count));
+					dgn_counter_use=dgn_counter_use->next;
+				}
+				dgn_counter_use->next=NULL;
+				dgn_counter_use->count_start=counter;
+				dgn_counter_use->name=malloc(strlen(char_name)+1);
+				strcpy(dgn_counter_use->name,char_name);
+				fprintf(ofp,"/* start counter %s */\n",char_name);
+			}
+			
+			continue;
+		}
+		
+		sscanf(in_line,"%s",char_name);
+		char_comment=(char *)(((int)(&in_line))+strlen(char_name));
+		while ((*char_comment==' ')||(*char_comment=='\t')) char_comment++;
+		for(char_comment_end=char_comment;(*char_comment_end!='\0')&&(*char_comment_end!='\n');char_comment_end++);
+		*char_comment_end='\0';
+		fprintf(ofp,"#define %s",char_name);
+		for (spc_cnt=strlen(char_name);spc_cnt<32;spc_cnt++) fprintf(ofp," ");
+		fprintf(ofp,"%3d",counter);
+		if (strlen(char_comment)>0) {
+			fprintf(ofp,"     /* %s */",char_comment);
+		}
+		fprintf(ofp,"\n");
+		counter++;
+	}
+
+	fprintf(ofp,"\n/* Totals */\n\n");
+
+	dgn_counter_use=dgn_counter_start;
+	while (dgn_counter_use) {
+		fprintf(ofp,"#define %s",dgn_counter_use->name);
+		for (spc_cnt=strlen(dgn_counter_use->name);spc_cnt<32;spc_cnt++) fprintf(ofp," ");
+		fprintf(ofp,"%3d\n",dgn_counter_use->count);
+		dgn_counter_use=dgn_counter_use->next;
+	}
+	
+	Fclose(ofp);
+
+}
 #ifdef STRICT_REF_DEF
 NEARDATA struct flag flags;
 # ifdef ATTRIB_H
