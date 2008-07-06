@@ -300,6 +300,9 @@ register struct monst *mtmp;
 #ifdef GOLDOBJ
         struct obj *ygold = 0, *lepgold = 0;
 #endif
+#ifdef CHESSMOVES
+	int old_mtmp_mx, old_mtmp_my;
+#endif
 
 /*	Pre-movement adjustments	*/
 
@@ -509,6 +512,10 @@ toofar:
 		    }
 		}
 
+#ifdef CHESSMOVES
+		old_mtmp_mx=mtmp->mx;
+		old_mtmp_my=mtmp->my;
+#endif
 		tmp = m_move(mtmp, 0);
 		distfleeck(mtmp,&inrange,&nearby,&scared);	/* recalc */
 
@@ -526,6 +533,26 @@ toofar:
 			if(Hallucination) newsym(mtmp->mx,mtmp->my);
 			break;
 		    case 1:	/* monster moved */
+#ifdef CHESSMOVES
+			if (canseemon(mtmp)) {
+    			    if (iflags.monster_runmode != RUN_TPORT) {
+				curs(WIN_MAP, old_mtmp_mx, old_mtmp_my);
+    				delay_output();
+    				if (iflags.monster_runmode != RUN_LEAP) {
+            			    delay_output();
+            			    if (iflags.monster_runmode == RUN_CRAWL) {
+                			delay_output();
+                			delay_output();
+                			delay_output();
+            			    }
+				}
+				/* refresh video */
+				curs_on_u();
+				flush_screen(1);
+				display_nhwindow(WIN_MAP,FALSE);
+    			    }
+			}
+#endif		    
 			/* Maybe it stepped on a trap and fell asleep... */
 			if (mtmp->msleeping || !mtmp->mcanmove) return(0);
 			if(!nearby &&
