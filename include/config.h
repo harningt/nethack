@@ -42,17 +42,18 @@
  * Define all of those you want supported in your binary.
  * Some combinations make no sense.  See the installation document.
  */
-#define TTY_GRAPHICS	/* good old tty based graphics */
+/* #define TTY_GRAPHICS	*/	/* good old tty based graphics */
 /* #define X11_GRAPHICS */	/* X11 interface */
 /* #define QT_GRAPHICS */	/* Qt interface */
 /* #define GNOME_GRAPHICS */	/* Gnome interface */
 /* #define MSWIN_GRAPHICS */	/* Windows NT, CE, Graphics */
+#define NEWT_GRAPHICS		/* newt interface */
 
 /*
  * Define the default window system.  This should be one that is compiled
  * into your system (see defines above).  Known window systems are:
  *
- *	tty, X11, mac, amii, BeOS, Qt, Gem, Gnome
+ *	tty, X11, mac, amii, BeOS, Qt, Gem, Gnome, newt
  */
 
 /* MAC also means MAC windows */
@@ -113,6 +114,18 @@
 # define HACKDIR "\\nethack"
 #endif
 
+#ifdef NEWT_GRAPHICS
+# define DEFAULT_WC_TILED_MAP
+# define USER_SOUNDS		            /* Use sounds */
+# ifdef USER_SOUNDS
+/* #  define USER_SOUNDS_REGEX */       /* Regular Expresion sound matches */
+# endif
+# ifndef DEFAULT_WINDOW_SYS
+#  define DEFAULT_WINDOW_SYS "newt"
+# endif
+# define POSITIONBAR
+#endif
+
 #ifndef DEFAULT_WINDOW_SYS
 # define DEFAULT_WINDOW_SYS "tty"
 #endif
@@ -169,11 +182,11 @@
 
 #ifdef UNIX
 /* path and file name extension for compression program */
-#define COMPRESS "/usr/bin/compress"	/* Lempel-Ziv compression */
-#define COMPRESS_EXTENSION ".Z"		/* compress's extension */
+/* #define COMPRESS "/usr/bin/compress"	*/	/* Lempel-Ziv compression */
+/* #define COMPRESS_EXTENSION ".Z" */		/* compress's extension */
 /* An example of one alternative you might want to use: */
-/* #define COMPRESS "/usr/local/bin/gzip" */	/* FSF gzip compression */
-/* #define COMPRESS_EXTENSION ".gz" */		/* normal gzip extension */
+#define COMPRESS "/usr/bin/gzip"		/* FSF gzip compression */
+#define COMPRESS_EXTENSION ".gz"		/* normal gzip extension */
 #endif
 
 #ifndef COMPRESS
@@ -185,7 +198,9 @@
  *	a tar-like file, thus making a neater installation.  See *conf.h
  *	for detailed configuration.
  */
-/* #define DLB */	/* not supported on all platforms */
+#ifndef DLB
+# define DLB	/* not supported on all platforms */
+#endif
 
 /*
  *	Defining INSURANCE slows down level changes, but allows games that
@@ -300,7 +315,7 @@ typedef unsigned char	uchar;
  * functions that have been macroized.
  */
 
-/* #define VISION_TABLES */ /* use vision tables generated at compile time */
+#define VISION_TABLES	/* use vision tables generated at compile time */
 #ifndef VISION_TABLES
 # ifndef NO_MACRO_CPATH
 #  define MACRO_CPATH	/* use clear_path macros instead of functions */

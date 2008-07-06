@@ -25,7 +25,7 @@ all:	$(VARDAT) spec_levs quest_levs dungeon
 	(cd ../util ; make tile2beos)
 
 ../util/tile2bmp:
-	(cd ../util ; make tile2bmp)
+	(cd ../util ; $(MAKE) tile2bmp)
 
 x11tiles: ../util/tile2x11 ../win/share/monsters.txt ../win/share/objects.txt \
 				../win/share/other.txt
@@ -52,6 +52,18 @@ rip.xpm: ../win/X11/rip.xpm
 
 mapbg.xpm: ../win/gnome/mapbg.xpm
 	cp ../win/gnome/mapbg.xpm mapbg.xpm
+
+ASCII.ttf: ../win/newt/data/ASCII.ttf
+	cp ../win/newt/data/ASCII.ttf ASCII.ttf
+
+VeraSe.ttf: ../win/newt/data/VeraSe.ttf
+	cp ../win/newt/data/VeraSe.ttf VeraSe.ttf
+
+VeraMono.ttf: ../win/newt/data/VeraMono.ttf
+	cp ../win/newt/data/VeraMono.ttf VeraMono.ttf
+
+README-newt.txt: ../win/newt/doc/README
+	cp ../win/newt/doc/README README-newt.txt
 
 nhsplash.xpm: ../win/Qt/nhsplash.xpm
 	cp ../win/Qt/nhsplash.xpm nhsplash.xpm
@@ -142,3 +154,8 @@ spotless:
 	-rm -f spec_levs quest_levs *.lev $(VARDAT) dungeon dungeon.pdf
 	-rm -f nhdat x11tiles beostiles pet_mark.xbm rip.xpm mapbg.xpm
 	-rm -f rip.img GEM_RSC.RSC title.img nh16.img NetHack.ad
+# cleanup after newt
+	-rm -f ASCII.ttf VeraSe.ttf VeraMono.ttf README-newt.txt
+# NetHack doesn't do this itself :(
+	-rm -f nhtiles.bmp
+

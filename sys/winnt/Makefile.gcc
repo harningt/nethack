@@ -34,7 +34,17 @@
 # Set to Y for a graphical version
 # Set to anything else (or undefine) for a tty version
 
-#GRAPHICAL = Y
+GRAPHICAL = Y
+ifeq  "$(GRAPHICAL)" "Y"
+USE_NEWT = Y
+ifeq  "$(USE_NEWT)" "Y"
+MINGW = c:/mingw
+GNUWIN32 = $(MINGW)/GnuWin32/gnuwin32/
+MSYS = c:/msys/1.0/local
+SDLCFLAGS = -I$(GNUWIN32)/include -I$(MINGW)/include -I$(MSYS)/include -I$(GNUWIN32)/include/SDL -I$(MINGW)/include/SDL -I$(MSYS)/include/SDL
+SDLLIBS = -L$(GNUWIN32)/lib -L$(MINGW)/lib -L$(MSYS)/lib -lmingw32 -lSDLmain -lSDL_ttf -lfreetype -lSDL -lSDL_mixer -lSDL_image -mwindows
+endif
+endif
 
 # Debug
 # Set to Y for Debug support (to produce debug information)
@@ -62,8 +72,13 @@ endif
 #  If not present prior to compilation it gets created.
 
 ifeq  "$(GRAPHICAL)" "Y"
+ifeq  "$(USE_NEWT)" "Y"
+# Game Name
+GAME    = NeWT
+else
 # Game Name
 GAME    = NetHackW
+endif
 else
 # Game Name
 GAME    = NetHack
@@ -93,6 +108,8 @@ NTSYS = ../sys/winnt
 TTY   = ../win/tty
 # window port files (Win32)
 WIN32 = ../win/win32
+# NeWT port files (NEthack With Tiles)
+NEWT = ../win/newt
 # Tile support files
 WSHR  = ../win/share
 
@@ -158,6 +175,27 @@ RANDOM  = $(OBJ)/random.o
 ################################################
 
 ifeq  "$(GRAPHICAL)" "Y"
+ifeq  "$(USE_NEWT)" "Y"
+WINPORT = \
+	$(O)newt_main.o \
+	$(O)newt_nhinput.o \
+	$(O)newt_nhmenus.o \
+	$(O)newt_nhoutput.o \
+	$(O)newt_nhwindows.o \
+	$(O)newt_nhunixtty.o \
+	$(O)newt_nhpaletted.o \
+	$(O)newt_globals.o \
+	$(O)newt_nhplayerselection.o \
+	$(O)tile.o
+
+WINPFLAG = -DTILES
+NHRES   = $(O)newtres.o
+WINPINC = -I$(NEWT)
+WINPHDR = 
+WINPLIBS = $(SDLLIBS) -lwinmm
+#NEWTCFLAGS = $(SDLCFLAGS) -DNETHACK -DDEBUG
+NEWTCFLAGS = $(SDLCFLAGS) -DNETHACK
+else
 WINPORT  = $(O)tile.o $(O)mhaskyn.o $(O)mhdlg.o \
 	$(O)mhfont.o $(O)mhinput.o $(O)mhmain.o $(O)mhmap.o \
 	$(O)mhmenu.o $(O)mhmsgwnd.o $(O)mhrip.o $(O)mhsplash.o \
@@ -171,6 +209,7 @@ WINPHDR = $(WIN32)/mhaskyn.h $(WIN32)/mhdlg.h $(WIN32)/mhfont.h \
 	$(WIN32)/mhrip.h $(WIN32)/mhstatus.h \
 	$(WIN32)/mhtext.h $(WIN32)/resource.h $(WIN32)/winMS.h
 WINPLIBS =  -lcomctl32 -lwinmm
+endif
 else
 WINPORT = $(O)nttty.o
 WINPFLAG= -DWIN32CON
@@ -186,7 +225,11 @@ TILEBMP16   = $(SRC)/tiles.bmp
 TILEUTIL32  = $(UTIL)/til2bm32.exe
 TILEBMP32   = $(SRC)/tiles32.bmp
 
+ifeq "$(USE_NEWT)" "Y"
+SOUND =
+else
 SOUND = $(OBJ)/ntsound.o
+endif
 
 #SOUND =
 
@@ -509,6 +552,11 @@ endif
 	$(subst /,\,if exist $(DOC)/nethack.txt copy $(DOC)/nethack.txt $(GAMEDIR)/NetHack.txt)
 	$(subst /,\,copy $(NTSYS)/defaults.nh   $(GAMEDIR)/defaults.nh)
 	$(subst /,\,echo install done > $@)
+ifeq "$(USE_NEWT)" "Y"
+	$(subst /,\,copy $(NEWT)/data/*.* $(GAMEDIR))
+	$(subst /,\,copy $(NEWT)/dll/*.* $(GAMEDIR))
+	$(subst /,\,copy $(SRC)/tiles.bmp $(GAMEDIR)/nhtiles.bmp)
+endif
 
 #  copy $(NTSYS)/winnt.hlp    $(GAMEDIR)
 
@@ -562,11 +610,16 @@ tileutil: $(U)gif2txt.exe $(U)gif2tx32.exe $(U)txt2ppm.exe
 	@echo Optional tile development utilities are up to date.
 
 ifeq  "$(GRAPHICAL)" "Y"
+ifeq "$(USE_NEWT)" "Y"
+$(NHRES): ../../dist/win32/NetHack.rc $(WIN32)/NetHack.ico
+	@$(rc) -o$@ --include-dir $(WIN32) -i ../../dist/win32/NetHack.rc
+else
 $(NHRES): $(TILEBMP16) $(WIN32)/winhack.rc $(WIN32)/mnsel.bmp \
 	 $(WIN32)/mnselcnt.bmp $(WIN32)/mnunsel.bmp \
 	 $(WIN32)/petmark.bmp $(WIN32)/NetHack.ico $(WIN32)/rip.bmp \
 	 $(WIN32)/splash.bmp
 	@$(rc) -o$@ --include-dir $(WIN32) -i $(WIN32)/winhack.rc
+endif
 else
 $(NHRES): $(NTSYS)/console.rc $(NTSYS)/NetHack.ico 
 	@$(rc) -o$@ --include-dir $(NTSYS) -i $(NTSYS)/console.rc
@@ -581,7 +634,11 @@ $(O)gamedir.tag:
 	$(subst /,\,@echo directory created > $@)
 
 ifeq  "$(GRAPHICAL)" "Y"
+ifeq "$(USE_NEWT)" "Y"
+$(GAMEFILE) : $(ALLOBJ) $(NHRES) $(TILEBMP16) $(O)gamedir.tag
+else
 $(GAMEFILE) : $(ALLOBJ) $(NHRES) $(O)gamedir.tag
+endif
 else
 $(GAMEFILE) : $(ALLOBJ) $(NHRES) $(O)gamedir.tag \
 	 $(GAMEDIR)/nhdefkey.dll $(GAMEDIR)/nh340key.dll $(GAMEDIR)/nhraykey.dll
@@ -624,9 +681,15 @@ $(GAME)_.ico : $(NTSYS)/$(GAME).ico
 
 graphicschk:
 ifeq  "$(GRAPHICAL)" "Y"
+ifeq  "$(USE_NEWT)" "Y"
+	@echo ----
+	@echo NOTE: This build will include NeWT graphic support.
+	@echo ----
+else
 	@echo ----
 	@echo NOTE: This build will include tile support.
 	@echo ----
+endif
 endif
 	$(subst /,\,@echo graphicschk > graphicschk)
 
@@ -1218,6 +1281,26 @@ $(O)wingem.o: ../win/gem/wingem.c $(HACK_H) $(INCL)/func_tab.h $(INCL)/dlb.h \
 $(O)wingem1.o: ../win/gem/wingem1.c $(INCL)/gem_rsc.h $(INCL)/load_img.h \
 		$(INCL)/gr_rect.h $(INCL)/wintype.h $(INCL)/wingem.h
 	$(cc) $(CFLAGS) -o$@ ../win/gem/wingem1.c
+
+$(O)newt_main.o: $(NEWT)/newt_main.c $(NEWT)/newt_main.h $(NEWT)/newt_nhwindows.h $(NEWT)/newt_nhmenus.h $(NEWT)/newt_nhinput.h $(NEWT)/newt_nhoutput.h $(NEWT)/newt_nhunixtty.h $(NEWT)/newt_nhpaletted.h $(NEWT)/newt_globals.h
+	$(cc) $(CFLAGS) $(NEWTCFLAGS) -o $(O)newt_main.o -c $(NEWT)/newt_main.c
+$(O)newt_nhinput.o: $(NEWT)/newt_nhinput.c $(NEWT)/newt_main.h $(NEWT)/newt_nhwindows.h $(NEWT)/newt_nhinput.h $(NEWT)/newt_nhoutput.h $(NEWT)/newt_globals.h
+	$(cc) $(CFLAGS) $(NEWTCFLAGS) -o $(O)newt_nhinput.o -c $(NEWT)/newt_nhinput.c
+$(O)newt_nhmenus.o: $(NEWT)/newt_nhmenus.c $(NEWT)/newt_main.h $(NEWT)/newt_nhmenus.h $(NEWT)/newt_nhwindows.h $(NEWT)/newt_nhinput.h $(NEWT)/newt_nhoutput.h $(NEWT)/newt_globals.h
+	$(cc) $(CFLAGS) $(NEWTCFLAGS) -o $(O)newt_nhmenus.o -c $(NEWT)/newt_nhmenus.c
+$(O)newt_nhoutput.o: $(NEWT)/newt_nhoutput.c $(NEWT)/newt_nhmenus.h $(NEWT)/newt_nhwindows.h $(NEWT)/newt_nhinput.h $(NEWT)/newt_nhoutput.h $(NEWT)/newt_globals.h
+	$(cc) $(CFLAGS) $(NEWTCFLAGS) -o $(O)newt_nhoutput.o -c $(NEWT)/newt_nhoutput.c
+$(O)newt_nhpaletted.o: $(NEWT)/newt_nhpaletted.c $(NEWT)/newt_nhpaletted.h
+	$(cc) $(CFLAGS) $(NEWTCFLAGS) -o $(O)newt_nhpaletted.o -c $(NEWT)/newt_nhpaletted.c
+$(O)newt_nhunixtty.o: $(NEWT)/newt_nhunixtty.c $(NEWT)/newt_nhunixtty.h
+	$(cc) $(CFLAGS) $(NEWTCFLAGS) -o $(O)newt_nhunixtty.o -c $(NEWT)/newt_nhunixtty.c
+$(O)newt_nhwindows.o: $(NEWT)/newt_nhwindows.c $(NEWT)/newt_main.h $(NEWT)/newt_nhmenus.h $(NEWT)/newt_nhwindows.h $(NEWT)/newt_nhinput.h $(NEWT)/newt_globals.h
+	$(cc) $(CFLAGS) $(NEWTCFLAGS) -o $(O)newt_nhwindows.o -c $(NEWT)/newt_nhwindows.c
+$(O)newt_globals.o: $(NEWT)/newt_globals.c $(NEWT)/newt_globals.h
+	$(cc) $(CFLAGS) $(NEWTCFLAGS) -o $(O)newt_globals.o -c $(NEWT)/newt_globals.c
+$(O)newt_nhplayerselection.o: $(NEWT)/newt_nhplayerselection.c $(NEWT)/newt_main.h $(NEWT)/newt_nhwindows.h $(NEWT)/newt_nhmenus.h
+	$(cc) $(CFLAGS) $(NEWTCFLAGS) -o $(O)newt_nhplayerselection.o -c $(NEWT)/newt_nhplayerselection.c
+
 $(O)load_img.o: ../win/gem/load_img.c $(INCL)/load_img.h
 	$(cc) $(CFLAGS) -o$@ ../win/gem/load_img.c
 $(O)gr_rect.o: ../win/gem/gr_rect.c $(INCL)/gr_rect.h

@@ -101,11 +101,11 @@ OBJDIR = ../src
 
 # yacc/lex programs to use to generate *_comp.h, *_lex.c, and *_yacc.c.
 # if, instead of yacc/lex you have bison/flex, comment/uncomment the following.
-YACC     = yacc
-LEX      = lex
-# YACC     = bison -y
+# YACC     = yacc
+# LEX      = lex
+YACC     = bison -y
 # YACC     = byacc
-# LEX      = flex
+LEX      = flex
  
 # these are the names of the output files from YACC/LEX. Under MS-DOS
 # and similar systems, they may differ
@@ -397,6 +397,8 @@ spotless: clean
 	-rm -f ../include/tile.h
 	-rm -f makedefs lev_comp dgn_comp recover dlb
 	-rm -f gif2txt txt2ppm tile2x11 tile2img.ttp xpm2img.ttp tilemap
+# devteam :(
+	-rm -f tile2bmp
 
 tileedit: tileedit.cpp $(TEXT_IO)
 	$(QTDIR)/bin/moc -o tileedit.moc tileedit.h

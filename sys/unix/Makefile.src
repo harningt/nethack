@@ -151,8 +151,8 @@ GNOMEINC=-I/usr/lib/glib/include -I/usr/lib/gnome-libs/include -I../win/gnome
 # flags for debugging:
 # CFLAGS = -g -I../include
 
-CFLAGS = -O -I../include
-LFLAGS = 
+CFLAGS = -g -I../include
+LFLAGS = -L/usr/X11R6/lib
 
 # The Qt and Be window systems are written in C++, while the rest of
 # NetHack is standard C.  If using Qt, uncomment the LINK line here to get
@@ -211,11 +211,48 @@ WINBEOBJ =
 #WINBESRC = ../win/BeOS/winbe.cpp ../win/BeOS/NHWindow.cpp \
 #	../win/BeOS/NHMenuWindow.cpp ../win/BeOS/NHMapWindow.cpp tile.c
 #WINBEOBJ = winbe.o NHWindow.o NHMenuWindow.o NHMapWindow.o tile.o
+#
+# Files for the newt interface.
+#
+ifndef SDLCONFIG
+	OS := $(shell uname -s)
+	ifeq ($(OS),FreeBSD)
+		SDLCONFIG := sdl11-config
+	else
+		SDLCONFIG := sdl-config
+	endif
+endif
+WINNEWTDIR = ../win/newt/
+WINNEWTINCLUDE = -I$(WINNEWTDIR)
+#WINNEWTMODECFLAGS=-O2
+#WINNEWTMODECFLAGS=-g -DDEBUG
+WINNEWTMODECFLAGS=-g
+WINNEWTCFLAGS = $(CFLAGS) $(WINNEWTINCLUDE) $(WINNEWTMODECFLAGS) -Wall -Werror `$(SDLCONFIG) --cflags`
+#WINNEWTCFLAGS = $(CFLAGS) $(WINNEWTINCLUDE) -g `$(SDLCONFIG) --cflags` -DDEBUG
+WINNEWTSRC = $(WINNEWTDIR)newt_main.c \
+           $(WINNEWTDIR)newt_nhinput.c \
+           $(WINNEWTDIR)newt_nhmenus.c \
+           $(WINNEWTDIR)newt_nhoutput.c \
+           $(WINNEWTDIR)newt_nhwindows.c \
+           $(WINNEWTDIR)newt_nhunixtty.c \
+           $(WINNEWTDIR)newt_nhpaletted.c \
+           $(WINNEWTDIR)newt_globals.c \
+           $(WINNEWTDIR)newt_nhplayerselection.c
+WINNEWTOBJ = newt_main.o \
+           newt_nhinput.o \
+           newt_nhmenus.o \
+           newt_nhoutput.o \
+           newt_nhwindows.o \
+           newt_nhunixtty.o \
+           newt_nhpaletted.o \
+           newt_globals.o \
+           newt_nhplayerselection.o \
+           tile.o
 
 #
 #
-WINSRC = $(WINTTYSRC)
-WINOBJ = $(WINTTYOBJ)
+WINSRC = $(WINNEWTSRC)
+WINOBJ = $(WINNEWTOBJ)
 
 # on some systems the termcap library is in -ltermcap or -lcurses
 # on 386 Xenix, the -ltermlib tputs() seems not to work; use -lcurses instead
@@ -254,8 +291,11 @@ WINGEMLIB = -le_gem -lgem
 #
 # libraries for BeOS 
 WINBELIB = -lbe
+#
+# libraries for newt
+WINNEWTLIB = `$(SDLCONFIG) --libs` -lSDL_image -lSDL_ttf -lSDL_mixer
 
-WINLIB = $(WINTTYLIB)
+WINLIB = $(WINNEWTLIB)
 
 # any other strange libraries your system needs (for Sysunix only -- the more
 # specialized targets should already be right)
@@ -285,7 +325,7 @@ WINLIB = $(WINTTYLIB)
 LIBS =
 
 # make NetHack
-GAME     = nethack
+GAME     = nethack-newt
 # GAME     = nethack.prg
 
 # if you defined RANDOM in unixconf.h/tosconf.h since your system did not come
@@ -693,6 +733,24 @@ qt_clust.o: ../win/Qt/qt_clust.cpp ../include/qt_clust.h
 	$(CXX) $(CXXFLAGS) -c ../win/Qt/qt_clust.cpp
 qttableview.o: ../win/Qt/qttableview.cpp ../include/qttableview.h
 	$(CXX) $(CXXFLAGS) -c ../win/Qt/qttableview.cpp
+newt_main.o: $(WINNEWTDIR)newt_main.c $(WINNEWTDIR)newt_main.h $(WINNEWTDIR)newt_nhwindows.h $(WINNEWTDIR)newt_nhmenus.h $(WINNEWTDIR)newt_nhinput.h $(WINNEWTDIR)newt_nhoutput.h $(WINNEWTDIR)newt_nhunixtty.h $(WINNEWTDIR)newt_nhpaletted.h $(WINNEWTDIR)newt_globals.h
+	$(CC) $(WINNEWTCFLAGS) -c $(WINNEWTDIR)newt_main.c
+newt_nhinput.o: $(WINNEWTDIR)newt_nhinput.c $(WINNEWTDIR)newt_main.h $(WINNEWTDIR)newt_nhwindows.h $(WINNEWTDIR)newt_nhinput.h $(WINNEWTDIR)newt_nhoutput.h $(WINNEWTDIR)newt_globals.h
+	$(CC) $(WINNEWTCFLAGS) -c $(WINNEWTDIR)newt_nhinput.c
+newt_nhmenus.o: $(WINNEWTDIR)newt_nhmenus.c $(WINNEWTDIR)newt_main.h $(WINNEWTDIR)newt_nhmenus.h $(WINNEWTDIR)newt_nhwindows.h $(WINNEWTDIR)newt_nhinput.h $(WINNEWTDIR)newt_nhoutput.h $(WINNEWTDIR)newt_globals.h
+	$(CC) $(WINNEWTCFLAGS) -c $(WINNEWTDIR)newt_nhmenus.c
+newt_nhoutput.o: $(WINNEWTDIR)newt_nhoutput.c $(WINNEWTDIR)newt_nhmenus.h $(WINNEWTDIR)newt_nhwindows.h $(WINNEWTDIR)newt_nhinput.h $(WINNEWTDIR)newt_nhoutput.h $(WINNEWTDIR)newt_globals.h
+	$(CC) $(WINNEWTCFLAGS) -c $(WINNEWTDIR)newt_nhoutput.c
+newt_nhpaletted.o: $(WINNEWTDIR)newt_nhpaletted.c $(WINNEWTDIR)newt_nhpaletted.h
+	$(CC) $(WINNEWTCFLAGS) -c $(WINNEWTDIR)newt_nhpaletted.c
+newt_nhunixtty.o: $(WINNEWTDIR)newt_nhunixtty.c $(WINNEWTDIR)newt_nhunixtty.h
+	$(CC) $(WINNEWTCFLAGS) -c $(WINNEWTDIR)newt_nhunixtty.c
+newt_nhwindows.o: $(WINNEWTDIR)newt_nhwindows.c $(WINNEWTDIR)newt_main.h $(WINNEWTDIR)newt_nhmenus.h $(WINNEWTDIR)newt_nhwindows.h $(WINNEWTDIR)newt_nhinput.h $(WINNEWTDIR)newt_globals.h
+	$(CC) $(WINNEWTCFLAGS) -c $(WINNEWTDIR)newt_nhwindows.c
+newt_globals.o: $(WINNEWTDIR)newt_globals.c $(WINNEWTDIR)newt_globals.h
+	$(CC) $(WINNEWTCFLAGS) -c $(WINNEWTDIR)newt_globals.c
+newt_nhplayerselection.o: $(WINNEWTDIR)newt_nhplayerselection.c $(WINNEWTDIR)newt_main.h $(WINNEWTDIR)newt_nhwindows.h $(WINNEWTDIR)newt_nhmenus.h
+	$(CC) $(WINNEWTCFLAGS) -c $(WINNEWTDIR)newt_nhplayerselection.c
 monstr.o: monstr.c $(CONFIG_H)
 vis_tab.o: vis_tab.c $(CONFIG_H) ../include/vis_tab.h
 allmain.o: allmain.c $(HACK_H)

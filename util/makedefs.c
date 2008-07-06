@@ -806,6 +806,9 @@ static const char *window_opts[] = {
 #ifdef BEOS_GRAPHICS
 		"BeOS InterfaceKit",
 #endif
+#ifdef NEWT_GRAPHICS
+		"NEthack With Tiles (newt)",
+#endif
 		0
 	};
 

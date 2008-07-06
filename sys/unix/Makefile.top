@@ -14,18 +14,18 @@
 # MAKE = make
 
 # make NetHack
-PREFIX	 = /usr
-GAME     = nethack
+PREFIX	 = /usr/local
+GAME     = nethack-newt
 # GAME     = nethack.prg
-GAMEUID  = games
-GAMEGRP  = bin
+GAMEUID  = root
+GAMEGRP  = games
 
 # Permissions - some places use setgid instead of setuid, for instance
 # See also the option "SECURE" in include/config.h
-GAMEPERM = 04755
-FILEPERM = 0644
-EXEPERM  = 0755
-DIRPERM  = 0755
+GAMEPERM = 04775
+FILEPERM = 0664
+EXEPERM  = 0775
+DIRPERM  = 0775
 
 # GAMEDIR also appears in config.h as "HACKDIR".
 # VARDIR may also appear in unixconf.h as "VAR_PLAYGROUND" else GAMEDIR
@@ -35,12 +35,12 @@ DIRPERM  = 0755
 # therefore there should not be anything in GAMEDIR that you want to keep
 # (if there is, you'll have to do the installation by hand or modify the
 # instructions)
-GAMEDIR  = $(PREFIX)/games/lib/$(GAME)dir
+GAMEDIR  = $(PREFIX)/games/$(GAME)dir
 VARDIR  = $(GAMEDIR)
 SHELLDIR = $(PREFIX)/games
 
 # per discussion in Install.X11 and Install.Qt
-VARDATND = 
+VARDATND = nhtiles.bmp ASCII.ttf VeraSe.ttf VeraMono.ttf README-newt.txt
 # VARDATND = x11tiles NetHack.ad pet_mark.xbm
 # VARDATND = x11tiles NetHack.ad pet_mark.xbm rip.xpm
 # for Atari/Gem
@@ -146,6 +146,18 @@ rip.xpm:
 
 mapbg.xpm:
 	(cd dat ; $(MAKE) mapbg.xpm )
+
+ASCII.ttf:
+	(cd dat ; $(MAKE) ASCII.ttf )
+
+VeraSe.ttf:
+	(cd dat ; $(MAKE) VeraSe.ttf )
+
+VeraMono.ttf:
+	(cd dat ; $(MAKE) VeraMono.ttf )
+
+README-newt.txt:
+	(cd dat ; $(MAKE) README-newt.txt )
 
 nhsplash.xpm:
 	( cd dat ; $(MAKE) nhsplash.xpm )

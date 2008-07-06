@@ -40,6 +40,10 @@ extern struct window_procs Gnome_procs;
 #ifdef MSWIN_GRAPHICS
 extern struct window_procs mswin_procs;
 #endif
+#ifdef NEWT_GRAPHICS
+extern struct window_procs newt_procs;
+extern void NDECL(newt_win_init);
+#endif
 
 STATIC_DCL void FDECL(def_raw_print, (const char *s));
 
@@ -80,6 +84,9 @@ struct win_choices {
 #endif
 #ifdef MSWIN_GRAPHICS
     { &mswin_procs, 0 },
+#endif
+#ifdef NEWT_GRAPHICS
+    { &newt_procs, newt_win_init },
 #endif
     { 0, 0 }		/* must be last */
 };

@@ -69,7 +69,7 @@ static struct Bool_Opt
 	{"checkspace", (boolean *)0, FALSE, SET_IN_FILE},
 #endif
 	{"cmdassist", &iflags.cmdassist, TRUE, SET_IN_GAME},
-# if defined(MICRO) || defined(WIN32)
+# if defined(MICRO) || defined(WIN32) || defined(NEWT_GRAPHICS)
 	{"color",         &iflags.wc_color,TRUE, SET_IN_GAME},		/*WC*/
 # else	/* systems that support multiple terminals, many monochrome */
 	{"color",         &iflags.wc_color, FALSE, SET_IN_GAME},	/*WC*/
@@ -81,7 +81,7 @@ static struct Bool_Opt
 	{"DECgraphics", (boolean *)0, FALSE, SET_IN_FILE},
 #endif
 	{"eight_bit_tty", &iflags.wc_eight_bit_input, FALSE, SET_IN_GAME},	/*WC*/
-#ifdef TTY_GRAPHICS
+#if defined(TTY_GRAPHICS) || defined(NEWT_GRAPHICS)
 	{"extmenu", &iflags.extmenu, FALSE, SET_IN_GAME},
 #else
 	{"extmenu", (boolean *)0, FALSE, SET_IN_FILE},
