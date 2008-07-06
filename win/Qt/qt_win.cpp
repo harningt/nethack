@@ -1557,11 +1557,11 @@ void NetHackQtMapWindow::Scroll(int dx, int dy)
 
 void NetHackQtMapWindow::Clear()
 {
-    unsigned short stone=cmap_to_glyph(S_stone);
+    unsigned short unexplored=cmap_to_glyph(S_unexplored);
 
     for (int j=0; j<ROWNO; j++) {
 	for (int i=0; i<COLNO; i++) {
-	    Glyph(i,j)=stone;
+	    Glyph(i,j)=unexplored;
 	}
     }
 
@@ -3461,7 +3461,7 @@ void NetHackQtInvUsageWindow::drawWorn(QPainter& painter, obj* nhobj, int x, int
     else if (canbe)
 	glyph=cmap_to_glyph(S_room);
     else
-	glyph=cmap_to_glyph(S_stone);
+	glyph=cmap_to_glyph(S_unexplored);
 
     qt_settings->glyphs().drawCell(painter,glyph,x,y);
 }

@@ -150,8 +150,8 @@ STATIC_VAR struct map_struct {
 }  map[ROWNO][COLNO];	/* track the glyphs */
 
 # define vga_clearmap() { int x,y; for (y=0; y < ROWNO; ++y) \
-	for (x=0; x < COLNO; ++x) { map[y][x].glyph = cmap_to_glyph(S_stone); \
-	map[y][x].ch = S_stone; map[y][x].attr = 0; map[y][x].special = 0;} }
+	for (x=0; x < COLNO; ++x) { map[y][x].glyph = cmap_to_glyph(S_unexplored); \
+	map[y][x].ch = S_unexplored; map[y][x].attr = 0; map[y][x].special = 0;} }
 # define TOP_MAP_ROW 1
 #  if defined(OVLB)
 STATIC_VAR int vgacmap[CLR_MAX] = {0,3,5,9,4,8,12,14,11,2,6,7,1,8,12,13};
@@ -506,13 +506,13 @@ boolean clearfirst;
 		for (y = 0; y < ROWNO; ++y) {
 #    endif
 		    if (iflags.traditional_view) {
-			if (!(clearfirst && map[y][x].ch == S_stone))
+			if (!(clearfirst && map[y][x].ch == S_unexplored))
 				vga_WriteChar(
 					(unsigned char)map[y][x].ch,
 					x,y + TOP_MAP_ROW,map[y][x].attr);
 		    } else {
 		      t = map[y][x].glyph;
-		      if (!(clearfirst && t == cmap_to_glyph(S_stone))) {
+		      if (!(clearfirst && t == cmap_to_glyph(S_unexplored))) {
 			if (!iflags.over_view) {
 			  	if (!ReadPlanarTileFile(glyph2tile[t], 
 				    &planecell)) {

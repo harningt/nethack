@@ -80,7 +80,7 @@ image_of_worn_object(struct obj *o)
     if (o)
 	glyph = obj_to_glyph(o);
     else
-	glyph = cmap_to_glyph(S_stone);
+	glyph = cmap_to_glyph(S_unexplored);
 
     im = ghack_image_from_glyph(glyph, FALSE);
 

@@ -856,20 +856,20 @@ display_map_window(wp)
 }
 
 /*
- * Set all map tiles to S_stone
+ * Set all map tiles to S_unexplored
  */
 static void
-map_all_stone(map_info)
+map_all_unexplored(map_info)
 struct map_info_t *map_info;
 {
     int i;
-    unsigned short *sp, stone;
-    stone = cmap_to_glyph(S_stone);
+    unsigned short *sp, unexplored;
+    unexplored = cmap_to_glyph(S_unexplored);
 
     for (sp = (unsigned short *) map_info->mtype.tile_map->glyphs, i = 0;
 	i < ROWNO*COLNO; sp++, i++)
 
-    *sp = stone;
+    *sp = unexplored;
 }
 
 /*
@@ -885,7 +885,7 @@ clear_map_window(wp)
     struct map_info_t *map_info = wp->map_information;
 
     if (map_info->is_tile) {
-	map_all_stone(map_info);
+	map_all_unexplored(map_info);
     } else {
 	/* Fill text with spaces, and update */
 	(void) memset((genericptr_t) map_info->mtype.text_map->text, ' ',
@@ -1505,7 +1505,7 @@ create_map_window(wp, create_popup, parent)
     }
 
     if (map_info->is_tile) {
-	map_all_stone(map_info);
+	map_all_unexplored(map_info);
     }
 }
 

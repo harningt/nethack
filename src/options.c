@@ -606,7 +606,7 @@ initoptions()
         if (flags.lit_corridor && iflags.use_color) {
             showsyms[S_darkroom]=showsyms[S_room];
         } else {
-            showsyms[S_darkroom]=showsyms[S_stone];
+            showsyms[S_darkroom]=showsyms[S_unexplored];
         }
 	return;
 }
@@ -2533,7 +2533,7 @@ doset()
 	    if (flags.lit_corridor && iflags.use_color) {
 		showsyms[S_darkroom]=showsyms[S_room];
 	    } else {
-		showsyms[S_darkroom]=showsyms[S_stone];
+		showsyms[S_darkroom]=showsyms[S_unexplored];
 	    }
 	    (void) doredraw();
 	}

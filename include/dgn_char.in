@@ -10,6 +10,7 @@
 # begin dungeon characters 
 
 .MAXDCHARS
+S_unexplored
 S_stone
 S_vwall
 S_hwall

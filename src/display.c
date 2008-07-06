@@ -308,7 +308,7 @@ unmap_object(x, y)
 							    lev->typ == ROOM)
 	    lev->glyph = cmap_to_glyph(S_darkroom);
     } else
-	levl[x][y].glyph = cmap_to_glyph(S_stone);	/* default val */
+	levl[x][y].glyph = cmap_to_glyph(S_unexplored);	/* default val */
 }
 
 
@@ -563,7 +563,7 @@ feel_location(x, y)
 		    lev->glyph = (!lev->waslit) ? cmap_to_glyph(S_darkroom) : cmap_to_glyph(S_room);
 		    show_glyph(x,y,lev->glyph);
 		}
-	    } else if ((lev->glyph >= cmap_to_glyph(S_stone) &&
+	    } else if ((lev->glyph >= cmap_to_glyph(S_unexplored) &&
 			lev->glyph < cmap_to_glyph(S_darkroom)) ||
 		       glyph_is_invisible(levl[x][y].glyph)) {
 		lev->glyph = (!cansee(x,y) && !lev->waslit) ? cmap_to_glyph(S_darkroom) :
@@ -931,7 +931,7 @@ swallowed(first)
 	/* Clear old location */
 	for (y = lasty-1; y <= lasty+1; y++)
 	    for (x = lastx-1; x <= lastx+1; x++)
-		if (isok(x,y)) show_glyph(x,y,cmap_to_glyph(S_stone));
+		if (isok(x,y)) show_glyph(x,y,cmap_to_glyph(S_unexplored));
     }
 
     swallower = monsndx(u.ustuck->data);
@@ -1000,13 +1000,13 @@ under_water(mode)
 	for (y = lasty-1; y <= lasty+1; y++)
 	    for (x = lastx-1; x <= lastx+1; x++)
 		if (isok(x,y))
-		    show_glyph(x,y,cmap_to_glyph(S_stone));
+		    show_glyph(x,y,cmap_to_glyph(S_unexplored));
     }
     for (x = u.ux-1; x <= u.ux+1; x++)
 	for (y = u.uy-1; y <= u.uy+1; y++)
 	    if (isok(x,y) && is_pool(x,y)) {
 		if (Blind && !(x == u.ux && y == u.uy))
-		    show_glyph(x,y,cmap_to_glyph(S_stone));
+		    show_glyph(x,y,cmap_to_glyph(S_unexplored));
 		else	
 		    newsym(x,y);
 	    }
@@ -1180,7 +1180,7 @@ docrt()
     for (x = 1; x < COLNO; x++) {
 	lev = &levl[x][0];
 	for (y = 0; y < ROWNO; y++, lev++)
-	    if (lev->glyph != cmap_to_glyph(S_stone))
+	    if (lev->glyph != cmap_to_glyph(S_unexplored))
 		show_glyph(x,y,lev->glyph);
     }
 
@@ -1289,9 +1289,9 @@ show_glyph(x,y,glyph)
     }
 
 
-static gbuf_entry nul_gbuf = { 0, cmap_to_glyph(S_stone) };
+static gbuf_entry nul_gbuf = { 0, cmap_to_glyph(S_unexplored) };
 /*
- * Turn the 3rd screen into stone.
+ * Turn the 3rd screen into unexplored area.
  */
 void
 clear_glyph_buffer()
@@ -1309,7 +1309,7 @@ clear_glyph_buffer()
 }
 
 /*
- * Assumes that the indicated positions are filled with S_stone glyphs.
+ * Assumes that the indicated positions are filled with S_unexplored glyphs.
  */
 void
 row_refresh(start,stop,y)
@@ -1318,7 +1318,7 @@ row_refresh(start,stop,y)
     register int x;
 
     for (x = start; x <= stop; x++)
-	if (gbuf[y][x].glyph != cmap_to_glyph(S_stone))
+	if (gbuf[y][x].glyph != cmap_to_glyph(S_unexplored))
 	    print_glyph(WIN_MAP,x,y,gbuf[y][x].glyph);
 }
 
@@ -1414,7 +1414,7 @@ back_to_glyph(x,y)
 	case TLWALL:
 	case TRWALL:
 	case SDOOR:
-	    idx = ptr->seenv ? wall_angle(ptr) : S_stone;
+	    idx = ptr->seenv ? wall_angle(ptr) : S_unexplored;
 	    break;
 	case DOOR:
 	    if (ptr->doormask) {

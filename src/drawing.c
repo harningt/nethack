@@ -204,7 +204,8 @@ const struct symdef def_warnsyms[WARNCOUNT] = {
  *  Note:  {ibm|dec|mac}_graphics[] arrays also depend on this symbol order.
  */
 const struct symdef defsyms[MAXPCHARS] = {
-/* 0*/	{' ', "unexplored area",C(NO_COLOR)},	/* stone */
+/* 0*/	{' ', "unexplored area",C(NO_COLOR)},	/* unexplored */
+      	{'-', "stone wall",	C(CLR_BROWN)},	/* stone */
 	{'|', "wall",		C(CLR_GRAY)},	/* vwall */
 	{'-', "wall",		C(CLR_GRAY)},	/* hwall */
 	{'-', "wall",		C(CLR_GRAY)},	/* tlcorn */
@@ -316,7 +317,8 @@ void NDECL((*ibmgraphics_mode_callback)) = 0;	/* set in tty_start_screen() */
 #endif /* PC9800 */
 
 static uchar ibm_graphics[MAXPCHARS] = {
-/* 0*/	g_FILLER(S_stone),
+/* 0*/	g_FILLER(S_unexplored),
+	0xc4,
 	0xb3,	/* S_vwall:	meta-3, vertical rule */
 	0xc4,	/* S_hwall:	meta-D, horizontal rule */
 	0xda,	/* S_tlcorn:	meta-Z, top left corner */
@@ -416,7 +418,8 @@ static uchar ibm_graphics[MAXPCHARS] = {
 void NDECL((*decgraphics_mode_callback)) = 0;  /* set in tty_start_screen() */
 
 static uchar dec_graphics[MAXPCHARS] = {
-/* 0*/	g_FILLER(S_stone),
+/* 0*/	g_FILLER(S_unexplored),
+	0xf1,
 	0xf8,	/* S_vwall:	meta-x, vertical rule */
 	0xf1,	/* S_hwall:	meta-q, horizontal rule */
 	0xec,	/* S_tlcorn:	meta-l, top left corner */
@@ -514,7 +517,8 @@ static uchar dec_graphics[MAXPCHARS] = {
 
 #ifdef MAC_GRAPHICS_ENV
 static uchar mac_graphics[MAXPCHARS] = {
-/* 0*/	g_FILLER(S_stone),
+/* 0*/	g_FILLER(S_unexplored),
+	0xcd,
 	0xba,	/* S_vwall */
 	0xcd,	/* S_hwall */
 	0xc9,	/* S_tlcorn */
@@ -827,6 +831,7 @@ boolean is_rlevel;
 # ifdef ASCIIGRAPH
 	} else {
 	    /* a la EPYX Rogue */
+	    showsyms[S_stone]   = 0xcd;
 	    showsyms[S_vwall]   = 0xba; /* all walls now use	*/
 	    showsyms[S_hwall]   = 0xcd; /* double line graphics	*/
 	    showsyms[S_tlcorn]  = 0xc9;
