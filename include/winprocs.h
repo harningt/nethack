@@ -175,6 +175,9 @@ extern NEARDATA struct window_procs windowprocs;
 					/* no free bits */
 
 #define WC2_FULLSCREEN		0x01L	/* 01 display full screen                    */
+#ifdef POSITIONBAR_RCOPTION
+# define WC2_POSITIONBAR	0X08L
+#endif
 #define WC2_SOFTKEYBOARD	0x02L	/* 02 software keyboard                      */
 #define WC2_WRAPTEXT		0x04L	/* 04 wrap long lines of text                */
 					/* 29 free bits */

@@ -62,6 +62,9 @@ moveloop()
     for(;;) {
 	get_nh_event();
 #ifdef POSITIONBAR
+# ifdef POSITIONBAR_RCOPTION
+	if (iflags.wc_position_bar)
+# endif
 	do_positionbar();
 #endif
 

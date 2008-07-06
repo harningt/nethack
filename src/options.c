@@ -145,6 +145,9 @@ static struct Bool_Opt
 #endif
 	{"perm_invent", &flags.perm_invent, FALSE, SET_IN_GAME},
 	{"popup_dialog",  &iflags.wc_popup_dialog, FALSE, SET_IN_GAME},	/*WC*/
+#ifdef POSITIONBAR_RCOPTION
+	{"position_bar", &iflags.wc_position_bar, TRUE, SET_IN_GAME},
+#endif	
 	{"prayconfirm", &flags.prayconfirm, TRUE, SET_IN_GAME},
 	{"preload_tiles", &iflags.wc_preload_tiles, TRUE, DISP_IN_GAME},	/*WC*/
 	{"pushweapon", &flags.pushweapon, FALSE, SET_IN_GAME},
@@ -3591,6 +3594,9 @@ struct wc_Opt wc_options[] = {
 
 struct wc_Opt wc2_options[] = {
 	{"fullscreen", WC2_FULLSCREEN},
+#ifdef POSITIONBAR_RCOPTION
+	{"position_bar", WC2_POSITIONBAR},
+#endif	
 	{"softkeyboard", WC2_SOFTKEYBOARD},
 	{"wraptext", WC2_WRAPTEXT},
 	{(char *)0, 0L}

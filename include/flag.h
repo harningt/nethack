@@ -258,6 +258,9 @@ struct instance_flags {
 	boolean	wc_splash_screen;	/* display an opening splash screen or not */
 	boolean	wc_popup_dialog;	/* put queries in pop up dialogs instead of
 				   		in the message window */
+#ifdef POSITIONBAR_RCOPTION
+	boolean wc_position_bar;
+#endif						
 	boolean wc_eight_bit_input;	/* allow eight bit input               */
 	boolean wc_mouse_support;	/* allow mouse support */
 	boolean wc2_fullscreen;		/* run fullscreen */
