@@ -350,6 +350,10 @@ typedef unsigned char	uchar;
 
 /*#define GOLDOBJ */	/* Gold is kept on obj chains - Helge Hafting */
 /*#define AUTOPICKUP_EXCEPTIONS */ /* exceptions to autopickup */
+#define LINEOFSIGHT	/* Show line of sight */
+#ifdef LINEOFSIGHT
+# define LINEOFSIGHT_COLOUR	/* Allow selection of the colour used for shading */
+#endif
 
 /* End of Section 5 */
 

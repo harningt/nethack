@@ -29,6 +29,10 @@ extern char *viz_rmax;			/* max could see indices */
  */
 #define cansee(x,y)	(viz_array[y][x] & IN_SIGHT)
 #define couldsee(x,y)	(viz_array[y][x] & COULD_SEE)
+#ifdef LINEOFSIGHT
+# define couldsee_old(x,y)	(viz_array_old[y][x] & COULD_SEE)
+# define cansee_old(x,y)	(viz_array_old[y][x] & IN_SIGHT)
+#endif
 #define templit(x,y)	(viz_array[y][x] & TEMP_LIT)
 
 /*

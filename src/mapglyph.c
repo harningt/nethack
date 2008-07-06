@@ -125,9 +125,24 @@ unsigned *ospecial;
 #ifdef TEXTCOLOR
 	    /* provide a visible difference if normal and lit corridor
 	     * use the same symbol */
+# ifdef LINEOFSIGHT
+	    if (iflags.use_color) {
+		if (iflags.wc_lineofsight) {
+		    if (!couldsee(x,y) || !cansee(x,y) || (offset == S_corr))
+#  ifdef LINEOFSIGHT_COLOUR
+			color = iflags.los_colour;
+#  else		    
+			color = CLR_BLUE;
+#  endif			
+		}
+		else if (offset == S_litcorr && ch == showsyms[S_corr])
+		    color = CLR_WHITE;
+	    }
+# else
 	    if (iflags.use_color &&
 		offset == S_litcorr && ch == showsyms[S_corr])
 		color = CLR_WHITE;
+# endif
 	    else
 #endif
 	    cmap_color(offset);

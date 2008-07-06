@@ -326,6 +326,9 @@ E const char *materialnm[];
 /* Vision */
 E NEARDATA boolean vision_full_recalc;	/* TRUE if need vision recalc */
 E NEARDATA char **viz_array;		/* could see/in sight row pointers */
+#ifdef LINEOFSIGHT
+E NEARDATA char **viz_array_old;	/* could see/in sight row pointers previous */
+#endif
 
 /* Window system stuff */
 E NEARDATA winid WIN_MESSAGE, WIN_STATUS;

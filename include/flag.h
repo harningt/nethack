@@ -220,6 +220,9 @@ struct instance_flags {
  * Window capability support.
  */
 	boolean wc_color;		/* use color graphics                  */
+#ifdef LINEOFSIGHT
+	boolean wc_lineofsight;		/* show line of sight                  */
+#endif	
 	boolean wc_hilite_pet;		/* hilight pets                        */
 	boolean wc_ascii_map;		/* show map using traditional ascii    */
 	boolean wc_tiled_map;		/* show map using tiles                */
@@ -271,6 +274,9 @@ struct instance_flags {
 	boolean  showrace;	/* show hero glyph by race rather than by role */
 	boolean  travelcmd;	/* allow travel command */
 	int	 runmode;	/* update screen display during run moves */
+#ifdef LINEOFSIGHT_COLOUR
+	int	 los_colour;	/* colour to use for shaded areas when lineofsight is on */
+#endif	
 #ifdef AUTOPICKUP_EXCEPTIONS
 	struct autopickup_exception *autopickup_exceptions[2];
 #define AP_LEAVE 0
