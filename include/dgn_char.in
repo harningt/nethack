@@ -30,6 +30,7 @@ S_hcdoor	closed door, horizontal wall
 S_bars		Added by KMH 
 S_tree		Added by KMH 
 S_room
+S_darkroom
 S_corr
 S_litcorr
 S_upstair
