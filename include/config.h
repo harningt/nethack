@@ -42,17 +42,21 @@
  * Define all of those you want supported in your binary.
  * Some combinations make no sense.  See the installation document.
  */
-#define TTY_GRAPHICS	/* good old tty based graphics */
+#define TTY_GRAPHICS 	/* good old tty based graphics */
 /* #define X11_GRAPHICS */	/* X11 interface */
 /* #define QT_GRAPHICS */	/* Qt interface */
 /* #define GNOME_GRAPHICS */	/* Gnome interface */
 /* #define MSWIN_GRAPHICS */	/* Windows NT, CE, Graphics */
+
+#define VULTURES_GRAPHICS /* Vulture's Eye isometric graphics interface */
+#undef TTY_GRAPHICS
 
 /*
  * Define the default window system.  This should be one that is compiled
  * into your system (see defines above).  Known window systems are:
  *
  *	tty, X11, mac, amii, BeOS, Qt, Gem, Gnome
+ *	vultures (Vulture's Eye)
  */
 
 /* MAC also means MAC windows */
@@ -94,6 +98,12 @@
 #  define DEFAULT_WINDOW_SYS "Qt"
 # endif
 #endif
+
+#ifdef VULTURES_GRAPHICS
+# ifndef DEFAULT_WINDOW_SYS
+#  define DEFAULT_WINDOW_SYS "vultures"
+# endif
+#endif /* VULTURES_GRAPHICS */
 
 #ifdef GNOME_GRAPHICS
 # define USE_XPM		/* Use XPM format for images (required) */
@@ -169,11 +179,11 @@
 
 #ifdef UNIX
 /* path and file name extension for compression program */
-#define COMPRESS "/usr/bin/compress"	/* Lempel-Ziv compression */
-#define COMPRESS_EXTENSION ".Z"		/* compress's extension */
+#define COMPRESS "/usr/bin/compress"   /* Lempel-Ziv compression */                                      
+#define COMPRESS_EXTENSION ".Z"        /* compress's extension */                                        
 /* An example of one alternative you might want to use: */
-/* #define COMPRESS "/usr/local/bin/gzip" */	/* FSF gzip compression */
-/* #define COMPRESS_EXTENSION ".gz" */		/* normal gzip extension */
+/* #define COMPRESS "/usr/local/bin/gzip" */   /* FSF gzip compression */                                
+/* #define COMPRESS_EXTENSION ".gz" */     /* normal gzip extension */                                   
 #endif
 
 #ifndef COMPRESS
@@ -185,7 +195,7 @@
  *	a tar-like file, thus making a neater installation.  See *conf.h
  *	for detailed configuration.
  */
-/* #define DLB */	/* not supported on all platforms */
+#define DLB  /* not supported on all platforms */
 
 /*
  *	Defining INSURANCE slows down level changes, but allows games that
@@ -350,6 +360,10 @@ typedef unsigned char	uchar;
 
 /*#define GOLDOBJ */	/* Gold is kept on obj chains - Helge Hafting */
 /*#define AUTOPICKUP_EXCEPTIONS */ /* exceptions to autopickup */
+#define DUMP_LOG        /* Dump game end information to a file */
+/* #define DUMP_FN "/tmp/%n.nh" */      /* Fixed dumpfile name, if you want
+                                         * to prevent definition by users */
+#define DUMPMSGS 20     /* Number of latest messages in the dump file  */
 
 /* End of Section 5 */
 

@@ -806,6 +806,9 @@ static const char *window_opts[] = {
 #ifdef BEOS_GRAPHICS
 		"BeOS InterfaceKit",
 #endif
+#ifdef VULTURES_GRAPHICS
+		"Vulture's Eye isometric graphics",
+#endif
 		0
 	};
 

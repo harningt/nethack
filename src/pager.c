@@ -10,7 +10,11 @@
 
 STATIC_DCL boolean FDECL(is_swallow_sym, (int));
 STATIC_DCL int FDECL(append_str, (char *, const char *));
+#ifdef VULTURES_GRAPHICS
+struct permonst * FDECL(lookat, (int, int, char *, char *));
+#else
 STATIC_DCL struct permonst * FDECL(lookat, (int, int, char *, char *));
+#endif
 STATIC_DCL void FDECL(checkfile,
 		      (char *,struct permonst *,BOOLEAN_P,BOOLEAN_P));
 STATIC_DCL int FDECL(do_look, (BOOLEAN_P));
@@ -54,7 +58,11 @@ append_str(buf, new_str)
  * Return the name of the glyph found at (x,y).
  * If not hallucinating and the glyph is a monster, also monster data.
  */
+#ifdef VULTURES_GRAPHICS
+struct permonst *
+#else
 STATIC_OVL struct permonst *
+#endif
 lookat(x, y, buf, monbuf)
     int x, y;
     char *buf, *monbuf;

@@ -40,7 +40,7 @@ Guidebook.dvi:	Guidebook.tex
 	latex Guidebook.tex
 
 
-GAME	= nethack
+GAME	= vultureseye
 MANDIR	= /usr/man/man6
 MANEXT	= 6
 

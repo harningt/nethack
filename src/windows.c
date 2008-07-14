@@ -40,6 +40,9 @@ extern struct window_procs Gnome_procs;
 #ifdef MSWIN_GRAPHICS
 extern struct window_procs mswin_procs;
 #endif
+#ifdef VULTURES_GRAPHICS
+#include "vultures_main.h"
+#endif
 
 STATIC_DCL void FDECL(def_raw_print, (const char *s));
 
@@ -77,6 +80,9 @@ struct win_choices {
 #endif
 #ifdef GNOME_GRAPHICS
     { &Gnome_procs, 0 },
+#endif
+#ifdef VULTURES_GRAPHICS
+    { &vultures_procs, win_vultures_init },
 #endif
 #ifdef MSWIN_GRAPHICS
     { &mswin_procs, 0 },

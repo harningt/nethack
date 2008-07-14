@@ -4,6 +4,9 @@
 
 #include "hack.h"
 
+#ifdef VULTURES_GRAPHICS
+# include "vultures_main.h"
+#endif
 #ifdef OVLB
 
 STATIC_DCL void FDECL(do_oname, (struct obj *));
@@ -69,6 +72,10 @@ const char *goal;
     lock_mouse_cursor(TRUE);
 #endif
     for (;;) {
+#ifdef VULTURES_GRAPHICS
+      /* Hack to allow nh_poskey to detect the calling function (yuck!). */
+      vultures_whatis_active = 1;
+#endif      
 	c = nh_poskey(&tx, &ty, &sidx);
 	if (c == '\033') {
 	    cx = cy = -10;
@@ -187,6 +194,10 @@ const char *goal;
     if (msg_given) clear_nhwindow(WIN_MESSAGE);
     cc->x = cx;
     cc->y = cy;
+#ifdef VULTURES_GRAPHICS
+      /* Hack to allow nh_poskey to detect the calling function (yuck!). */
+      vultures_whatis_active = 0;
+#endif          
     return result;
 }
 

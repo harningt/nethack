@@ -151,7 +151,17 @@ GNOMEINC=-I/usr/lib/glib/include -I/usr/lib/gnome-libs/include -I../win/gnome
 # flags for debugging:
 # CFLAGS = -g -I../include
 
-CFLAGS = -O -I../include
+# VULTURESCFLAGS will be passed to the sub-makefile for vultures
+OS = $(shell uname -s)
+ifeq ($(OS),FreeBSD)
+	SDL_CONFIG = sdl11-config
+	SDLMAIN = -lSDLmain-1.1
+else
+	SDL_CONFIG = sdl-config
+	SDLMAIN = -lSDLmain
+endif
+VULTURESCFLAGS = -Wall -g
+CFLAGS = -g -I../include -I ../win/vultures $(shell $(SDL_CONFIG) --cflags)
 LFLAGS = 
 
 # The Qt and Be window systems are written in C++, while the rest of
@@ -173,6 +183,9 @@ CXX=g++
 WINTTYSRC = ../win/tty/getline.c ../win/tty/termcap.c ../win/tty/topl.c \
 	../win/tty/wintty.c
 WINTTYOBJ = getline.o termcap.o topl.o wintty.o
+
+# object for a Vulture's Eye port
+WINVULTURESOBJ = ../win/vultures/build_n/vultures.o tile.o
 #
 # files for an X11 port
 # (tile.c is a generated source file)
@@ -214,8 +227,8 @@ WINBEOBJ =
 
 #
 #
-WINSRC = $(WINTTYSRC)
-WINOBJ = $(WINTTYOBJ)
+WINSRC = 
+WINOBJ = $(WINVULTURESOBJ)
 
 # on some systems the termcap library is in -ltermcap or -lcurses
 # on 386 Xenix, the -ltermlib tputs() seems not to work; use -lcurses instead
@@ -232,6 +245,13 @@ WINOBJ = $(WINTTYOBJ)
 # WINTTYLIB = -lcurses16
 # WINTTYLIB = -lncurses
 WINTTYLIB = -ltermlib
+
+# SDL libraries for Vulture's Eye
+WINVULTURESLIB = `$(SDL_CONFIG) --libs` $(SDLMAIN) -lSDL_mixer  -lSDL_ttf -lpng -lz
+ifeq ($(OS),Darwin)
+	WINVULTURESLIB += -lstdc++
+endif
+
 #
 # libraries for X11
 # If USE_XPM is defined in config.h, you will also need -lXpm here.
@@ -255,7 +275,7 @@ WINGEMLIB = -le_gem -lgem
 # libraries for BeOS 
 WINBELIB = -lbe
 
-WINLIB = $(WINTTYLIB)
+WINLIB = $(WINVULTURESLIB)
 
 # any other strange libraries your system needs (for Sysunix only -- the more
 # specialized targets should already be right)
@@ -285,7 +305,7 @@ WINLIB = $(WINTTYLIB)
 LIBS =
 
 # make NetHack
-GAME     = nethack
+GAME     = vultureseye
 # GAME     = nethack.prg
 
 # if you defined RANDOM in unixconf.h/tosconf.h since your system did not come
@@ -361,7 +381,7 @@ HACKINCL = align.h amiconf.h artifact.h artilist.h attrib.h beconf.h color.h \
 	os2conf.h patchlevel.h pcconf.h permonst.h prop.h rect.h region.h rm.h \
 	sp_lev.h spell.h system.h tcap.h timeout.h tosconf.h tradstdc.h \
 	trampoli.h trap.h unixconf.h vault.h vision.h vmsconf.h wintty.h \
-	winX.h winprocs.h wintype.h you.h youprop.h
+	winX.h winprocs.h wintype.h you.h youprop.h vultures_version.h
 
 HSOURCES = $(HACKINCL) date.h onames.h pm.h vis_tab.h\
 		lev_comp.h dgn_comp.h dgn_file.h
@@ -392,7 +412,7 @@ $(GAME):	$(SYSTEM)
 
 Sysunix:	$(HOBJ) Makefile
 	@echo "Loading ..."
-	$(LINK) $(LFLAGS) -o $(GAME) $(HOBJ) $(WINLIB) $(LIBS)
+	@$(LINK) $(LFLAGS) -o $(GAME) $(HOBJ) $(WINLIB) $(LIBS)
 	@touch Sysunix
 
 Sys3B2:	$(HOBJ) Makefile
@@ -458,6 +478,9 @@ monst.o:
 objects.o:
 	$(CC) $(CFLAGS) -c objects.c
 	@rm -f $(MAKEDEFS)
+	
+../win/vultures/build_n/vultures.o: objects.o monst.o ../include/date.h ../win/vultures/*
+	@$(MAKE) -C ../win/vultures/ BUILD=nethack BASECFLAGS="$(VULTURESCFLAGS)"
 
 # Qt windowport meta-object-compiler output
 qt_kde0.moc: ../include/qt_kde0.h
@@ -521,6 +544,7 @@ tags: $(CSOURCES)
 
 clean:
 	-rm -f *.o $(HACK_H) $(CONFIG_H)
+	$(MAKE) -C ../win/vultures clean
 
 spotless: clean
 	-rm -f a.out core $(GAME) Sys*

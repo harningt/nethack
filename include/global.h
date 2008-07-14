@@ -182,6 +182,10 @@ typedef xchar	boolean;		/* 0 or 1 */
 #endif
 #endif
 
+#ifdef VULTURES_GRAPHICS
+# include "vultures_conf.h"
+#endif
+
 /* Displayable name of this port; don't redefine if defined in *conf.h */
 #ifndef PORT_ID
 # ifdef AMIGA
@@ -212,8 +216,14 @@ typedef xchar	boolean;		/* 0 or 1 */
 # ifdef TOS
 #  define PORT_ID	"ST"
 # endif
+# ifdef VULTURES_GRAPHICS
+#  include "vultures_version.h"
+# endif
 # ifdef UNIX
 #  define PORT_ID	"Unix"
+#  ifdef VULTURES_GRAPHICS
+#   define PORT_SUB_ID  VULTURES_SUB_ID
+#  endif
 # endif
 # ifdef VMS
 #  define PORT_ID	"VMS"
@@ -224,7 +234,11 @@ typedef xchar	boolean;		/* 0 or 1 */
 #   ifdef MSWIN_GRAPHICS
 #    define PORT_SUB_ID	"graphical"
 #   else
-#    define PORT_SUB_ID	"tty"
+#    ifdef VULTURES_GRAPHICS
+#     define PORT_SUB_ID VULTURES_SUB_ID
+#    else
+#     define PORT_SUB_ID	"tty"
+#    endif
 #   endif
 #  endif
 # endif
@@ -263,6 +277,11 @@ typedef xchar	boolean;		/* 0 or 1 */
 # endif
 #endif
 #if defined(AMII_GRAPHICS) || defined(GEM_GRAPHICS)
+# ifndef USE_TILES
+#  define USE_TILES
+# endif
+#endif
+#if defined(VULTURES_GRAPHICS)
 # ifndef USE_TILES
 #  define USE_TILES
 # endif

@@ -34,7 +34,17 @@
 # Set to Y for a graphical version
 # Set to anything else (or undefine) for a tty version
 
-#GRAPHICAL = Y
+GRAPHICAL = Y
+ifeq  "$(GRAPHICAL)" "Y"
+VULTURES = Y
+ifeq  "$(VULTURES)" "Y"
+MINGW = /mingw
+GNUWIN32 = $(MINGW)/GnuWin32/gnuwin32/
+MSYS = /msys/1.0/local
+SDLCFLAGS = -I$(GNUWIN32)/include -I$(MSYS)/include -I$(MINGW)/include -I$(MINGW)/include/SDL -I$(GNUWIN32)/include/SDL -I$(MSYS)/include/SDL
+SDLLIBS = -L$(GNUWIN32)/lib -L$(MSYS)/lib -L$(MINGW)/lib -lmingw32 -lSDLmain -lpng -lSDL_mixer -lSDL_ttf -lfreetype -lSDL -mwindows
+endif
+endif
 
 # Debug
 # Set to Y for Debug support (to produce debug information)
@@ -62,8 +72,13 @@ endif
 #  If not present prior to compilation it gets created.
 
 ifeq  "$(GRAPHICAL)" "Y"
+ifeq  "$(VULTURES)" "Y"
+# Game Name
+GAME    = VulturesEye
+else
 # Game Name
 GAME    = NetHackW
+endif
 else
 # Game Name
 GAME    = NetHack
@@ -93,6 +108,8 @@ NTSYS = ../sys/winnt
 TTY   = ../win/tty
 # window port files (Win32)
 WIN32 = ../win/win32
+# vultures port files (Vulture's Eye)
+JTP = ../win/vultures
 # Tile support files
 WSHR  = ../win/share
 
@@ -158,6 +175,20 @@ RANDOM  = $(OBJ)/random.o
 ################################################
 
 ifeq  "$(GRAPHICAL)" "Y"
+ifeq  "$(VULTURES)" "Y"
+WINPORT = $(O)vultures_win_event.o $(O)vultures_gen.o $(O)vultures_gfl.o \
+	$(O)vultures_gra.o $(O)vultures_mou.o $(O)vultures_sound.o \
+	$(O)vultures_sdl.o $(O)vultures_txt.o $(O)vultures_win.o $(O)vultures_pcmusic.o \
+	$(O)vultures_map.o $(O)vultures_init.o $(O)vultures_nhplayerselection.o \
+	$(O)vultures_opt.o $(O)vultures_tileconfig.parser.o $(O)vultures_tileconfig.lexer.o \
+	$(O)vultures_tileconfig.o $(O)vultures_main.o  $(O)vultures_tile.o $(O)icon.o $(O)tile.o
+WINPFLAG   = -DTILES $(SDLCFLAGS) -DVULTURESEYE
+NHRES   = 
+WINPINC = -I$(JTP)
+WINPHDR = 
+WINPLIBS = $(SDLLIBS) -lwinmm
+VULTURESTILESRC = ../win/vultures/gamedata/graphics/tilesrc
+else
 WINPORT  = $(O)tile.o $(O)mhaskyn.o $(O)mhdlg.o \
 	$(O)mhfont.o $(O)mhinput.o $(O)mhmain.o $(O)mhmap.o \
 	$(O)mhmenu.o $(O)mhmsgwnd.o $(O)mhrip.o $(O)mhsplash.o \
@@ -171,6 +202,7 @@ WINPHDR = $(WIN32)/mhaskyn.h $(WIN32)/mhdlg.h $(WIN32)/mhfont.h \
 	$(WIN32)/mhrip.h $(WIN32)/mhstatus.h \
 	$(WIN32)/mhtext.h $(WIN32)/resource.h $(WIN32)/winMS.h
 WINPLIBS =  -lcomctl32 -lwinmm
+endif
 else
 WINPORT = $(O)nttty.o
 WINPFLAG= -DWIN32CON
@@ -197,7 +229,11 @@ SOUND = $(OBJ)/ntsound.o
 USE_DLB = Y
 
 ifeq  "$(USE_DLB)" "Y"
+ifneq  "$(VULTURES)" "Y"
 DLBFLG = -DDLB
+else
+DLBFLG =
+endif
 else
 DLBFLG =
 endif
@@ -426,7 +462,7 @@ CONFIG_H = $(INCL)/config.h $(INCL)/config1.h $(INCL)/tradstdc.h \
 	       $(INCL)/system.h $(INCL)/unixconf.h $(INCL)/os2conf.h \
 	       $(INCL)/micro.h $(INCL)/pcconf.h $(INCL)/tosconf.h \
 	       $(INCL)/amiconf.h $(INCL)/macconf.h $(INCL)/beconf.h \
-	       $(INCL)/ntconf.h $(INCL)/nhlan.h
+	       $(INCL)/ntconf.h $(INCL)/nhlan.h ../win/vultures/vultures_version.h
 
 HACK_H = $(INCL)/hack.h $(CONFIG_H) $(INCL)/align.h \
 	       $(INCL)/dungeon.h $(INCL)/monsym.h $(INCL)/mkroom.h \
@@ -509,6 +545,26 @@ endif
 	$(subst /,\,if exist $(DOC)/nethack.txt copy $(DOC)/nethack.txt $(GAMEDIR)/NetHack.txt)
 	$(subst /,\,copy $(NTSYS)/defaults.nh   $(GAMEDIR)/defaults.nh)
 	$(subst /,\,echo install done > $@)
+ifeq  "$(VULTURES)" "Y"
+	$(subst /,\,if not exist $(GAMEDIR)/config/*.*   mkdir $(GAMEDIR)/config)
+	$(subst /,\,if not exist $(GAMEDIR)/graphics/*.* mkdir $(GAMEDIR)/graphics)
+	$(subst /,\,if not exist $(GAMEDIR)/tiles/*.*   mkdir $(GAMEDIR)/tiles)
+	$(subst /,\,if not exist $(GAMEDIR)/manual/*.*   mkdir $(GAMEDIR)/manual)
+	$(subst /,\,if not exist $(GAMEDIR)/manual/img/*.*   mkdir $(GAMEDIR)/manual/img)
+	$(subst /,\,if not exist $(GAMEDIR)/sound/*.*    mkdir $(GAMEDIR)/sound)
+	$(subst /,\,if not exist $(GAMEDIR)/music/*.*    mkdir $(GAMEDIR)/music)
+	$(subst /,\,if not exist $(GAMEDIR)/fonts/*.*    mkdir $(GAMEDIR)/fonts)
+	$(subst /,\,copy $(JTP)/gamedata/*.*           $(GAMEDIR))
+	$(subst /,\,copy $(JTP)/gamedata/config/*.*    $(GAMEDIR)/config)
+	$(subst /,\,copy $(JTP)/gamedata/graphics/*.*  $(GAMEDIR)/graphics)
+	$(subst /,\,copy $(JTP)/gamedata/tiles/*.*    $(GAMEDIR)/tiles)
+	$(subst /,\,copy $(JTP)/gamedata/manual/*.*    $(GAMEDIR)/manual)
+	$(subst /,\,copy $(JTP)/gamedata/manual/img/*.*    $(GAMEDIR)/manual/img)
+	$(subst /,\,copy $(JTP)/gamedata/sound/*.*     $(GAMEDIR)/sound)
+	$(subst /,\,copy $(JTP)/gamedata/music/*.*     $(GAMEDIR)/music)
+	$(subst /,\,copy $(JTP)/gamedata/fonts/*.*     $(GAMEDIR)/fonts)
+	$(subst /,\,copy $(JTP)/dll/*.* $(GAMEDIR))
+endif
 
 #  copy $(NTSYS)/winnt.hlp    $(GAMEDIR)
 
@@ -624,9 +680,15 @@ $(GAME)_.ico : $(NTSYS)/$(GAME).ico
 
 graphicschk:
 ifeq  "$(GRAPHICAL)" "Y"
+ifeq  "$(VULTURES)" "Y"
+	@echo ----
+	@echo NOTE: This build will include Vultures isometric graphic support.
+	@echo ----
+else
 	@echo ----
 	@echo NOTE: This build will include tile support.
 	@echo ----
+endif
 endif
 	$(subst /,\,@echo graphicschk > graphicschk)
 
@@ -727,7 +789,7 @@ $(WIN32)/splash.bmp: $(U)uudecode.exe $(WIN32)/splash.uu
 # Level Compiler Stuff
 #==========================================
 
-LEVCFLAGS=$(cflags) -c -DWIN32 -D_WIN32 -I../include $(cdebug) -DDLB
+LEVCFLAGS=$(cflags) -c -DWIN32 -D_WIN32 -I../include -I$(JTP) $(cdebug)
 
 $(U)lev_comp.exe: $(SPLEVOBJS)
 	@echo Linking $@...
@@ -1145,6 +1207,56 @@ $(O)topl.o: ../win/tty/topl.c $(HACK_H) $(INCL)/tcap.h
 $(O)wintty.o: ../win/tty/wintty.c $(HACK_H) $(INCL)/dlb.h \
 		$(INCL)/patchlevel.h $(INCL)/tcap.h
 	$(cc) $(CFLAGS) -o$@ ../win/tty/wintty.c
+$(O)vultures_gen.o: ../win/vultures/vultures_gen.c ../win/vultures/vultures_gen.h
+	$(cc) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vultures/vultures_gen.c
+$(O)vultures_gfl.o: ../win/vultures/vultures_gfl.c ../win/vultures/vultures_gfl.h
+	$(cc) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vultures/vultures_gfl.c
+$(O)vultures_gra.o: ../win/vultures/vultures_gra.c ../win/vultures/vultures_gra.h
+	$(cc) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vultures/vultures_gra.c
+$(O)vultures_mou.o: ../win/vultures/vultures_mou.c ../win/vultures/vultures_mou.h ../win/vultures/vultures_tile.h
+	$(cc) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vultures/vultures_mou.c
+$(O)vultures_sdl.o: ../win/vultures/vultures_sdl.c ../win/vultures/vultures_sdl.h
+	$(cc) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vultures/vultures_sdl.c
+$(O)vultures_txt.o: ../win/vultures/vultures_txt.c ../win/vultures/vultures_txt.h
+	$(cc) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vultures/vultures_txt.c
+$(O)vultures_win.o: ../win/vultures/vultures_win.c ../win/vultures/vultures_win.h ../win/vultures/vultures_tile.h
+	$(cc) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vultures/vultures_win.c
+$(O)vultures_map.o: ../win/vultures/vultures_map.c ../win/vultures/vultures_map.h
+	$(cc) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vultures/vultures_map.c
+$(O)vultures_init.o: ../win/vultures/vultures_init.c ../win/vultures/vultures_init.h ../win/vultures/vultures_tile.h
+	$(cc) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vultures/vultures_init.c
+$(O)vultures_pcmusic.o: ../win/vultures/vultures_pcmusic.c ../win/vultures/vultures_pcmusic.h ../win/vultures/vultures_tile.h
+	$(cc) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vultures/vultures_pcmusic.c
+
+$(O)vultures_tile.o: ../win/vultures/vultures_tile.c ../win/vultures/vultures_tile.h ../win/vultures/vultures_tile.h
+	$(cc) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vultures/vultures_tile.c
+$(O)vultures_win_event.o: ../win/vultures/vultures_win_event.c ../win/vultures/vultures_win_event.h ../win/vultures/vultures_tile.h
+	$(cc) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vultures/vultures_win_event.c
+$(O)vultures_sound.o: ../win/vultures/vultures_sound.c ../win/vultures/vultures_sound.h
+	$(cc) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vultures/vultures_sound.c
+$(O)vultures_opt.o: ../win/vultures/vultures_opt.c ../win/vultures/vultures_opt.h
+	$(cc) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vultures/vultures_opt.c
+
+$(O)vultures_main.o: ../win/vultures/vultures_main.c ../win/vultures/vultures_main.h ../win/vultures/vultures_tile.h
+	$(cc) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vultures/vultures_main.c	
+$(O)vultures_nhplayerselection.o: ../win/vultures/vultures_nhplayerselection.c ../win/vultures/vultures_nhplayerselection.h 
+	$(cc) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vultures/vultures_nhplayerselection.c 
+$(O)vultures_tileconfig.o: ../win/vultures/vultures_tileconfig.c ../win/vultures/vultures_tileconfig.h 
+	$(cc) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vultures/vultures_tileconfig.c
+
+$(O)vultures_tileconfig.parser.o: ../win/vultures/vultures_tileconfig.parser.c ../win/vultures/vultures_tileconfig.h 
+	$(cc) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vultures/vultures_tileconfig.parser.c 
+$(O)vultures_tileconfig.lexer.o: ../win/vultures/vultures_tileconfig.lexer.c ../win/vultures/vultures_tileconfig.h  ../win/vultures/vultures_tileconfig.parser.h
+	$(cc) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vultures/vultures_tileconfig.lexer.c 
+
+../win/vultures/vultures_tileconfig.parser.c ../win/vultures/vultures_tileconfig.parser.h: ../win/vultures/vultures_tileconfig.parser.y 
+	bison --no-lines -d $< -o ../win/vultures/vultures_tileconfig.parser.c
+../win/vultures/vultures_tileconfig.lexer.c: ../win/vultures/vultures_tileconfig.lexer.l 
+	flex -o../win/vultures/vultures_tileconfig.lexer.c ../win/vultures/vultures_tileconfig.lexer.l
+
+
+$(O)icon.o: ../win/vultures/gamedata/nh_icon.ico ../win/vultures/$(GAME).rc
+	windres ../win/vultures/$(GAME).rc $@
 $(O)Window.o: ../win/X11/Window.c $(INCL)/xwindowp.h $(INCL)/xwindow.h \
 		$(CONFIG_H)
 	$(cc) $(CFLAGS) -o$@ ../win/X11/Window.c
