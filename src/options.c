@@ -57,7 +57,11 @@ static struct Bool_Opt
 	{"asksavedisk", (boolean *)0, FALSE, SET_IN_GAME},
 #endif
 	{"autodig", &flags.autodig, FALSE, SET_IN_GAME},
+#ifdef VULTURES_GRAPHICS    
+	{"autopickup", &flags.pickup, FALSE, SET_IN_GAME},
+#else
 	{"autopickup", &flags.pickup, TRUE, SET_IN_GAME},
+#endif
 	{"autoquiver", &flags.autoquiver, FALSE, SET_IN_GAME},
 #if defined(MICRO) && !defined(AMIGA)
 	{"BIOS", &iflags.BIOS, FALSE, SET_IN_FILE},
@@ -75,7 +79,7 @@ static struct Bool_Opt
 	{"checkspace", (boolean *)0, FALSE, SET_IN_FILE},
 #endif
 	{"cmdassist", &iflags.cmdassist, TRUE, SET_IN_GAME},
-# if defined(MICRO) || defined(WIN32)
+# if defined(MICRO) || defined(WIN32) || defined(VULTURES_GRAPHICS)
 	{"color",         &iflags.wc_color,TRUE, SET_IN_GAME},		/*WC*/
 # else	/* systems that support multiple terminals, many monochrome */
 	{"color",         &iflags.wc_color, FALSE, SET_IN_GAME},	/*WC*/
@@ -106,7 +110,11 @@ static struct Bool_Opt
 #endif
 	{"fullscreen", &iflags.wc2_fullscreen, FALSE, SET_IN_FILE},
 	{"help", &flags.help, TRUE, SET_IN_GAME},
+#ifdef VULTURES_GRAPHICS
+	{"hilite_pet",    &iflags.wc_hilite_pet, TRUE, SET_IN_GAME},	/*WC*/
+#else
 	{"hilite_pet",    &iflags.wc_hilite_pet, FALSE, SET_IN_GAME},	/*WC*/
+#endif
 #ifdef ASCIIGRAPH
 	{"IBMgraphics", &iflags.IBMgraphics, FALSE, SET_IN_GAME},
 #else
@@ -130,7 +138,11 @@ static struct Bool_Opt
 #endif
 	{"large_font", &iflags.obsolete, FALSE, SET_IN_FILE},	/* OBSOLETE */
 	{"legacy", &flags.legacy, TRUE, DISP_IN_GAME},
+#ifdef VULTURES_GRAPHICS    
+	{"lit_corridor", &flags.lit_corridor, TRUE, SET_IN_GAME},
+#else
 	{"lit_corridor", &flags.lit_corridor, FALSE, SET_IN_GAME},
+#endif
 	{"lootabc", &iflags.lootabc, FALSE, SET_IN_GAME},
 #ifdef MAC_GRAPHICS_ENV
 	{"Macgraphics", &iflags.MACgraphics, TRUE, SET_IN_GAME},
@@ -276,6 +288,14 @@ static struct Comp_Opt
 						SET_IN_GAME },
 	{ "dogname",  "the name of your (first) dog (e.g., dogname:Fang)",
 						PL_PSIZ, DISP_IN_GAME },
+#ifdef DUMP_LOG
+	{ "dumpfile", "where to dump data (e.g., dumpfile:/tmp/dump.nh)",
+#ifdef DUMP_FN
+						PL_PSIZ, DISP_IN_GAME },
+#else
+						PL_PSIZ, SET_IN_GAME },
+#endif
+#endif
 	{ "dungeon",  "the symbols to use in drawing the dungeon map",
 						MAXDCHARS+1, SET_IN_FILE },
 	{ "effects",  "the symbols to use in drawing special effects",
@@ -579,7 +599,12 @@ initoptions()
 	flags.end_own = FALSE;
 	flags.end_top = 3;
 	flags.end_around = 2;
+#ifdef VULTURES_GRAPHICS
+	iflags.runmode = RUN_STEP;
+    iflags.num_pad = 1;
+#else
 	iflags.runmode = RUN_LEAP;
+#endif
 	iflags.msg_history = 20;
 #ifdef TTY_GRAPHICS
 	iflags.prevmsg_window = 's';
@@ -1339,6 +1364,19 @@ boolean tinitial, tfrom_file;
 			nmcpy(dogname, op, PL_PSIZ);
 		return;
 	}
+
+#ifdef DUMP_LOG
+	fullname = "dumpfile";
+	if (match_optname(opts, fullname, 3, TRUE)) {
+#ifndef DUMP_FN
+		if (negated) bad_negation(fullname, FALSE);
+		else if ((op = string_for_opt(opts, !tfrom_file)) != 0
+			&& strlen(op) > 1)
+			nmcpy(dump_fn, op, PL_PSIZ);
+#endif
+		return;
+       }
+#endif
 
 	fullname = "horsename";
 	if (match_optname(opts, fullname, 5, TRUE)) {
@@ -3428,6 +3466,10 @@ char *buf;
 	}
 	else if (!strcmp(optname, "dogname")) 
 		Sprintf(buf, "%s", dogname[0] ? dogname : none );
+#ifdef DUMP_LOG
+	else if (!strcmp(optname, "dumpfile"))
+		Sprintf(buf, "%s", dump_fn[0] ? dump_fn: none );
+#endif
 	else if (!strcmp(optname, "dungeon"))
 		Sprintf(buf, "%s", to_be_done);
 	else if (!strcmp(optname, "effects"))

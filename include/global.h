@@ -203,6 +203,10 @@ typedef xchar	boolean;		/* 0 or 1 */
 #endif
 #endif
 
+#ifdef VULTURES_GRAPHICS
+#include "vultures_conf.h"
+#endif
+
 #ifndef FILE_AREAS
 
 #define fopen_datafile_area(area, filename, mode, use_spfx) \
@@ -269,8 +273,14 @@ typedef xchar	boolean;		/* 0 or 1 */
 # ifdef TOS
 #  define PORT_ID	"ST"
 # endif
+# ifdef VULTURES_GRAPHICS
+#  include "vultures_version.h"
+# endif
 # ifdef UNIX
 #  define PORT_ID	"Unix"
+#  ifdef VULTURES_GRAPHICS
+#   define PORT_SUB_ID  VULTURES_SUB_ID
+#  endif
 # endif
 # ifdef VMS
 #  define PORT_ID	"VMS"
@@ -281,9 +291,13 @@ typedef xchar	boolean;		/* 0 or 1 */
 #   if defined(MSWIN_GRAPHICS) || defined(GTK_GRAPHICS)
 #    define PORT_SUB_ID	"graphical"
 #   else
+#    ifdef VULTURES_GRAPHICS
+#     define PORT_SUB_ID    VULTURES_SUB_ID
+#    else
 #    define PORT_SUB_ID	"tty"
 #   endif
 #  endif
+# endif
 # endif
 #endif
 
@@ -324,7 +338,7 @@ typedef xchar	boolean;		/* 0 or 1 */
 #  define USE_TILES
 # endif
 #endif
-#if defined(GL_GRAPHICS) || defined(SDL_GRAPHICS)
+#if defined(GL_GRAPHICS) || defined(SDL_GRAPHICS) || defined(VULTURES_GRAPHICS)
 # ifndef USE_TILES
 #  define USE_TILES
 # endif

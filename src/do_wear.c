@@ -10,7 +10,7 @@ STATIC_DCL long takeoff_mask, taking_off;
 
 #else /* OVLB */
 
-STATIC_OVL NEARDATA long takeoff_mask = 0L;
+NEARDATA long takeoff_mask = 0L;
 static NEARDATA long taking_off = 0L;
 
 static NEARDATA int todelay;
@@ -43,9 +43,9 @@ static NEARDATA const long takeoff_order[] = { WORN_BLINDF, W_WEP,
 
 STATIC_DCL void FDECL(on_msg, (struct obj *));
 STATIC_DCL void FDECL(Ring_off_or_gone, (struct obj *, BOOLEAN_P));
-STATIC_PTR int FDECL(select_off, (struct obj *));
+int FDECL(select_off, (struct obj *));
 STATIC_DCL struct obj *NDECL(do_takeoff);
-STATIC_PTR int NDECL(take_off);
+int NDECL(take_off);
 STATIC_DCL int FDECL(menu_remarm, (int));
 STATIC_DCL void FDECL(already_wearing, (const char*));
 STATIC_DCL void FDECL(already_wearing2, (const char*, const char*));
@@ -1953,7 +1953,6 @@ unchanger()
 }
 
 /* occupation callback for 'A' */
-STATIC_PTR
 int
 select_off(otmp)
 register struct obj *otmp;
@@ -2123,9 +2122,8 @@ do_takeoff()
 	return(otmp);
 }
 
-static const char *disrobing = "";
+const char *disrobing = "";
 
-STATIC_PTR
 int
 take_off()
 {

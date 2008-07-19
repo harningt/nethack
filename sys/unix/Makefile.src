@@ -141,10 +141,21 @@ SYSOBJ = ioctl.o unixmain.o unixtty.o unixunix.o unixres.o
 #LINK = gcc
 #LFLAGS = -Xlinker -soname=_APP_
 
+
 # flags for debugging:
 # CFLAGS = -g -I../include
 
-CFLAGS = -O -I../include
+# VULTURESCFLAGS will be passed to the sub-makefile for vultures
+OS = $(shell uname -s)
+ifeq ($(OS),FreeBSD)
+        SDL_CONFIG = sdl11-config
+        SDLMAIN = -lSDLmain-1.1
+else
+        SDL_CONFIG = sdl-config
+        SDLMAIN = -lSDLmain
+endif
+VULTURESCFLAGS = -Wall -O -g
+CFLAGS = -g -O -I../include -I ../win/vultures $(shell $(SDL_CONFIG) --cflags)
 LFLAGS =
 
 # Only used for the Gnome interface.
@@ -197,6 +208,11 @@ WINGTKCFLAGS=`$(WINGTKCONFIG) --cflags`
 WINTTYSRC = ../win/tty/getline.c ../win/tty/termcap.c ../win/tty/topl.c \
 	../win/tty/wintty.c 
 WINTTYOBJ = getline.o termcap.o topl.o wintty.o 
+#
+
+WINVULTURESSRC =
+WINVULTURESOBJ = ../win/vultures/build_s/vultures.o tile.o
+
 #
 # files for an X11 port
 # (tile.c is included in the defn. for WINCSRC, below)
@@ -291,8 +307,8 @@ WINGLOBJ = gl_conf.o gl_emul.o gl_font.o gl_hardw.o \
 SDLGL_CFLAGS = `sdl-config --cflags`
 
 # Use these declarations if you only want to support the TTY windowing system
-WINSRC = $(WINTTYSRC)
-WINOBJ = $(WINTTYOBJ)
+WINSRC = $(WINVULTURESSRC)
+WINOBJ = $(WINVULTURESOBJ)
 # Use these declarations if you want to support the X11 windowing system
 # WINSRC = $(WINTTYSRC) $(WINX11SRC)
 # WINOBJ = $(WINTTYOBJ) $(WINX11OBJ)
@@ -338,6 +354,26 @@ WINOBJ = $(WINTTYOBJ)
 # WINTTYLIB = -lcurses16
 # WINTTYLIB = -lncurses
 WINTTYLIB = -ltermlib
+
+# SDL libraries for Vulture's Claw
+# Only used for the Vulture's Claw interface.
+# When including the Vulture's Claw interface, you need to include the SDL
+# directories. You should have sdl-config in your path; it gives the
+# necessary compile and link flags.
+#
+OS = $(shell uname -s)
+ifeq ($(OS),FreeBSD)
+	SDL = sdl11-config
+else
+	SDL = sdl-config
+endif
+WINVULTURESLIB = `$(SDL) --libs` $(SDLMAIN) -lSDL_mixer -lSDL_ttf -lpng -lz
+
+ifeq ($(OS),Darwin)
+	WINVULTURESLIB += -lstdc++
+endif
+
+
 #
 # libraries for X11
 # If USE_XPM is defined in config.h, you will also need -lXpm here.
@@ -371,8 +407,10 @@ WINGLLIB = -lGL
 # libraries for proxy
 WINPROXYLIB = -lpthread
 
+# Use this declaration if you only want to support the vultures windowing system
+WINLIB = $(WINVULTURESLIB)
 # Use this declaration if you only want to support the TTY windowing system
-WINLIB = $(WINTTYLIB)
+# WINLIB = $(WINTTYLIB)
 # Use this declaration if you want to support the X11 windowing system
 # WINLIB = $(WINTTYLIB) $(WINX11LIB)
 # Use this declaration if you want to support the Qt windowing system
@@ -419,7 +457,7 @@ WINLIB = $(WINTTYLIB)
 LIBS =
 
 # make NetHack
-GAME     = slashem
+GAME     = vulturesclaw
 # GAME     = slashem.prg
 
 # if you defined RANDOM in unixconf.h/tosconf.h since your system did not come
@@ -498,7 +536,7 @@ HACKINCL = align.h amiconf.h artifact.h artilist.h attrib.h beconf.h color.h \
 	os2conf.h patchlevel.h pcconf.h permonst.h prop.h rect.h region.h rm.h \
 	sp_lev.h spell.h system.h tcap.h timeout.h tosconf.h tradstdc.h \
 	trampoli.h trap.h unixconf.h vault.h vision.h vmsconf.h wintty.h \
-	winX.h winprocs.h wintype.h you.h youprop.h 
+	winX.h winprocs.h wintype.h you.h youprop.h vultures_version.h
 
 HSOURCES = $(HACKINCL) date.h onames.h pm.h vis_tab.h\
 		lev_comp.h dgn_comp.h dgn_file.h
@@ -598,6 +636,9 @@ objects.o:
 
 ../include/filename.h: $(MAKEDEFS)
 	../util/makedefs -f
+	
+../win/vultures/build_s/vultures.o: objects.o monst.o ../include/date.h ../win/vultures/*
+	@$(MAKE) -C ../win/vultures/ BUILD=slashem BASECFLAGS="$(VULTURESCFLAGS)"
 
 # Qt windowport meta-object-compiler output
 qt_kde0.moc: ../include/qt_kde0.h
@@ -670,6 +711,7 @@ tags: $(CSOURCES)
 
 clean:
 	-rm -f *.o nhwin.a $(HACK_H) $(CONFIG_H)
+	$(MAKE) -C ../win/vultures clean
 
 spotless: clean
 	-rm -f a.out core $(GAME) Sys*

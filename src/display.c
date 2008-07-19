@@ -790,7 +790,15 @@ newsym(x,y)
 	}
 	if (x == u.ux && y == u.uy) {
 	    if (senseself()) {
+#ifdef VULTURES_GRAPHICS
+        /* XXX Refreshes the ground when items are picked up or dropped.
+         * I'm not entirely sure if this is the 'best way' to do this.
+         * This should be revisited when more time is at hand.  Clive 
+         */
+		_map_location(x,y,1);	/* map *under* self */
+#else        
 		_map_location(x,y,0);	/* map *under* self */
+#endif            
 		display_self();
 	    } else
 		/* we can see what is there */
@@ -1397,6 +1405,106 @@ static gbuf_entry gbuf[ROWNO][COLNO];
 static char gbuf_start[ROWNO];
 static char gbuf_stop[ROWNO];
 
+#ifdef DUMP_LOG
+/* D: Added to dump screen to output file */
+STATIC_PTR uchar get_glyph_char(glyph)
+int glyph;
+{
+    uchar   ch;
+    register int offset;
+
+    if (glyph >= NO_GLYPH)
+        return ;
+
+    /*
+     *  Map the glyph back to a character.
+     *
+     *  Warning:  For speed, this makes an assumption on the order of
+     *		  offsets.  The order is set in display.h.
+     */
+    if ((offset = (glyph - GLYPH_WARNING_OFF)) >= 0) {	/* a warning flash */
+	ch = def_warnsyms[offset].sym;
+    } else if ((offset = (glyph - GLYPH_SWALLOW_OFF)) >= 0) {	/* swallow */
+	/* see swallow_to_glyph() in display.c */
+	ch = (uchar) defsyms[S_sw_tl + (offset & 0x7)].sym;
+    } else if ((offset = (glyph - GLYPH_ZAP_OFF)) >= 0) {	/* zap beam */
+	/* see zapdir_to_glyph() in display.c */
+	ch = defsyms[S_vbeam + (offset & 0x3)].sym;
+    } else if ((offset = (glyph - GLYPH_CMAP_OFF)) >= 0) {	/* cmap */
+	ch = defsyms[offset].sym;
+    } else if ((offset = (glyph - GLYPH_OBJ_OFF)) >= 0) {	/* object */
+	ch = def_oc_syms[(int)objects[offset].oc_class];
+    } else if ((offset = (glyph - GLYPH_RIDDEN_OFF)) >= 0) { /* mon ridden */
+	ch = def_monsyms[(int)mons[offset].mlet];
+    } else if ((offset = (glyph - GLYPH_BODY_OFF)) >= 0) {	/* a corpse */
+	ch = def_oc_syms[(int)objects[CORPSE].oc_class];
+    } else if ((offset = (glyph - GLYPH_DETECT_OFF)) >= 0) { /* mon detect */
+	ch = def_monsyms[(int)mons[offset].mlet];
+    } else if ((offset = (glyph - GLYPH_INVIS_OFF)) >= 0) {  /* invisible */
+	ch = DEF_INVISIBLE;
+    } else if ((offset = (glyph - GLYPH_PET_OFF)) >= 0) {	/* a pet */
+	ch = def_monsyms[(int)mons[offset].mlet];
+    } else {						    /* a monster */
+	ch = monsyms[(int)mons[glyph].mlet];
+    }
+    return ch;
+}
+
+#ifdef TTY_GRAPHICS
+extern const char * FDECL(compress_str, (const char *));
+#else
+const char*
+compress_str(str) /* copied from win/tty/wintty.c */
+const char *str;
+{
+	static char cbuf[BUFSZ];
+	/* compress in case line too long */
+	if((int)strlen(str) >= 80) {
+		register const char *bp0 = str;
+		register char *bp1 = cbuf;
+
+		do {
+			if(*bp0 != ' ' || bp0[1] != ' ')
+				*bp1++ = *bp0;
+		} while(*bp0++);
+	} else
+	    return str;
+	return cbuf;
+}
+#endif /* TTY_GRAPHICS */
+
+/* Take a screen dump */
+void dump_screen()
+{
+    register int x,y;
+    int lastc;
+    /* D: botl.c has a closer approximation to the size, but we'll go with
+     *    this */
+    char buf[300], *ptr;
+    
+    for (y = 0; y < ROWNO; y++) {
+	lastc = 0;
+	ptr = buf;
+	for (x = 1; x < COLNO; x++) {
+	    uchar c = get_glyph_char(gbuf[y][x].glyph);
+	    *ptr++ = c;
+	    if (c != ' ')
+		lastc = x;
+	}
+	buf[lastc] = '\0';
+	dump("", buf);
+    }
+    dump("", "");
+    bot1str(buf);
+    ptr = (char *) compress_str((const char *) buf);
+    dump("", ptr);
+    bot2str(buf);
+    dump("", buf);
+    dump("", "");
+    dump("", "");
+}
+#endif /* DUMP_LOG */
+
 /*
  * Store the glyph in the 3rd screen for later flushing.
  */
@@ -1468,6 +1576,9 @@ show_glyph(x,y,glyph)
 	if (gbuf_start[y] > x) gbuf_start[y] = x;
 	if (gbuf_stop[y]  < x) gbuf_stop[y]  = x;
     }
+#ifdef VULTURES_GRAPHICS
+    print_glyph(WIN_MAP,x,y,gbuf[y][x].glyph);
+#endif
 }
 
 

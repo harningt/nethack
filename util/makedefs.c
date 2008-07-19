@@ -939,6 +939,9 @@ static const char *window_opts[] = {
 #ifdef PROXY_GRAPHICS
 		"Plug-in modules",
 #endif
+#ifdef VULTURES_GRAPHICS
+		"Vulture's Eye isometric graphics",
+#endif
 		0
 	};
 

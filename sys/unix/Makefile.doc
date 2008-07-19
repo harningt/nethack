@@ -32,8 +32,8 @@ PSCMD = groff -Wall -Tps
 # GUIDECMD = type Guidebook.txt
 # The following work better with groff-1.18, eg on Linux
 # GUIDECMD = tbl tmac.n Guidebook.mn | nroff -c -Tascii | $(COLCMD)
-# GUIDECMD = tbl tmac.n Guidebook.mn | groff -Wall -mtty-char -Tascii -P-u -P-b 
-GUIDECMD = tbl tmac.n Guidebook.mn | nroff | $(COLCMD)
+GUIDECMD = tbl tmac.n Guidebook.mn | groff -Wall -mtty-char -Tascii -P-u -P-b 
+# GUIDECMD = tbl tmac.n Guidebook.mn | nroff | $(COLCMD)
 
 # the basic guidebook
 Guidebook:	Guidebook.mn
@@ -52,7 +52,7 @@ Guidebook.dvi:	Guidebook.tex
 # Guidebook.dvi:	Guidebook.mn
 #	tbl tmac.n Guidebook.mn | groff -Wall -Tdvi > Guidebook.dvi
 
-GAME    = slashem
+GAME    = vulturesclaw
 MANDIR	= /usr/man/man6
 MANEXT	= 6
 FRMANDIR= $(MANDIR:man6=fr/man6)

@@ -50,7 +50,7 @@
  * Define all of those you want supported in your binary.
  * Some combinations make no sense.  See the installation document.
  */
-#define TTY_GRAPHICS		/* good old tty based graphics */
+/* #define TTY_GRAPHICS */	/* good old tty based graphics */
 /* #define X11_GRAPHICS */	/* X11 interface */
 /* #define QT_GRAPHICS */	/* Qt Interface */
 /* #define KDE */		/* KDE Interface */
@@ -60,12 +60,13 @@
 /* #define MSWIN_GRAPHICS */	/* Windows NT, CE, Graphics */
 /* #define GL_GRAPHICS */	/* OpenGL graphics */
 /* #define SDL_GRAPHICS */	/* Software SDL graphics */
+#define VULTURES_GRAPHICS /* Vulture's Eye isometric graphics interface */
 
 /*
  * Define the default window system.  This should be one that is compiled
  * into your system (see defines above).  Known window systems are:
  *
- *	tty, X11, mac, amii, BeOS, Qt, Gem, Gnome, gtk, proxy, GL, SDL
+ *	tty, X11, mac, amii, BeOS, Qt, Gem, Gnome, gtk, proxy, GL, SDL, Vulture's Eye (vultures)
  */
 
 /* MAC also means MAC windows */
@@ -114,6 +115,12 @@
 #  define DEFAULT_WINDOW_SYS "Qt"
 # endif
 #endif
+
+#ifdef VULTURES_GRAPHICS
+# ifndef DEFAULT_WINDOW_SYS
+#  define DEFAULT_WINDOW_SYS "vultures"
+# endif
+#endif /* VULTURES_GRAPHICS */
 
 #ifdef GNOME_GRAPHICS
 # define USE_XPM		/* Use XPM format for images (required) */
@@ -249,7 +256,7 @@
  *	a tar-like file, thus making a neater installation.  See *conf.h
  *	for detailed configuration.
  */
-/* #define DLB */             /* not supported on all platforms */
+#define DLB             /* not supported on all platforms */
 
 /*
  *	Defining INSURANCE slows down level changes, but allows games that
