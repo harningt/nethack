@@ -79,22 +79,22 @@ getlin_hook_proc hook;
 		}
 		if(c == '\020') { /* ctrl-P */
 		    if (iflags.prevmsg_window != 's') {
-			int sav = ttyDisplay->inread;
-			ttyDisplay->inread = 0;
-			(void) tty_doprev_message();
-			ttyDisplay->inread = sav;
-			tty_clear_nhwindow(WIN_MESSAGE);
-			cw->maxcol = cw->maxrow;
-			addtopl(query);
-			addtopl(" ");
-			*bufp = 0;
-			addtopl(obufp);
-		    } else {
-			if (!doprev)
-			    (void) tty_doprev_message();/* need two initially */
-			(void) tty_doprev_message();
-			doprev = 1;
-			continue;
+				int sav = ttyDisplay->inread;
+				ttyDisplay->inread = 0;
+				(void) tty_doprev_message();
+				ttyDisplay->inread = sav;
+				tty_clear_nhwindow(WIN_MESSAGE);
+				cw->maxcol = cw->maxrow;
+				addtopl(query);
+				addtopl(" ");
+				*bufp = 0;
+				addtopl(obufp);
+			} else {
+				if (!doprev)
+				    (void) tty_doprev_message();/* need two initially */
+				(void) tty_doprev_message();
+				doprev = 1;
+				continue;
 		    }
 		} else if (doprev && iflags.prevmsg_window == 's') {
 		    tty_clear_nhwindow(WIN_MESSAGE);
