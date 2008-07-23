@@ -3156,7 +3156,7 @@ struct obj **obj_p;			/* object tossed/used */
 	uchar typ;
 	boolean shopdoor = FALSE, point_blank = TRUE;
 #ifdef LIGHT_SRC_SPELL
-        int lits = 0;
+        size_t lits = 0;
         boolean use_lights = FALSE;
 #endif
 
@@ -3878,7 +3878,7 @@ register int dx,dy;
     register const char *fltxt;
     struct obj *otmp;
 #ifdef LIGHT_SRC_SPELL
-    int lits = 0;
+    size_t lits = 0;
 #endif
 /*for mega crude hack to keep from blowing up in face --WAC*/
     int away=0;
