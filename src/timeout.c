@@ -2469,10 +2469,10 @@ relink_timers(ghostly)
                  * and light source code
                  */
 		if (ghostly) {
-		    if (!lookup_id_mapping((unsigned)curr->arg, &nid))
+		    if (!lookup_id_mapping((size_t)curr->arg, &nid))
                         panic("relink_timers 1b");
 		} else
-		    nid = (unsigned) curr->arg;
+		    nid = (size_t) curr->arg;
                 curr->arg = (genericptr_t) find_mid(nid, FM_EVERYWHERE);
 		if (!curr->arg) panic("cant find m_id %d", nid);
 		curr->needs_fixup = 0;
