@@ -32,12 +32,13 @@
 
 
 /* define any of the following that are appropriate */
-#define SVR4		/* use in addition to SYSV for System V Release 4 */
+/* #define SVR4		/* use in addition to SYSV for System V Release 4 */
 			/* including Solaris 2+ */
 #define NETWORK		/* if running on a networked system */
 			/* e.g. Suns sharing a playground through NFS */
 /* #define SUNOS4 */	/* SunOS 4.x */
-/* #define LINUX */	/* Another Unix clone */
+#define LINUX /* Another Unix clone */
+/* #define OSX	 /* Apple OS X */
 /* #define CYGWIN32 */	/* Unix on Win32 -- use with case sensitive defines */
 /* #define GENIX */	/* Yet Another Unix Clone */
 /* #define HISX */	/* Bull Unix for XPS Machines */
@@ -109,11 +110,9 @@
  * Define DEF_PAGER as your default pager, e.g. "/bin/cat" or "/usr/ucb/more"
  * If defined, it can be overridden by the environment variable PAGER.
  * Hack will use its internal pager if DEF_PAGER is not defined.
- * (This might be preferable for security reasons.)
- * #define DEF_PAGER	".../mydir/mypager"
- */
+ * (This might be preferable for security reasons.)*/
 
-
+/*#define DEF_PAGER	"/usr/bin/less"*/
 
 /*
  * Define PORT_HELP to be the name of the port-specfic help file.
@@ -132,7 +131,7 @@
  * "extra output" method is used, but not all systems provide access to
  * a fine-grained timer.
  */
-/* #define TIMED_DELAY */	/* usleep() */
+#define TIMED_DELAY /* usleep() */
 #endif
 
 /*
@@ -143,7 +142,7 @@
  * A stat system call is done on the mailbox every MAILCKFREQ moves.
  */
 
-#define MAIL			/* Deliver mail during the game */
+/* #define MAIL			/* Deliver mail during the game */
 
 /* The Andrew Message System does mail a little differently from normal
  * UNIX.  Mail is deposited in the user's own directory in ~/Mailbox
@@ -209,6 +208,12 @@
 
 #define FCMASK	0660	/* file creation mask */
 
+/* fcntl(2) is a POSIX-portable call for manipulating file descriptors.
+ * Comment out the USE_FCNTL if for some reason you have a strange
+ * os/filesystem combination for which fcntl(2) does not work. */
+#ifdef POSIX_TYPES
+# define USE_FCNTL
+#endif
 
 /*
  * The remainder of the file should not need to be changed.
@@ -270,7 +275,7 @@
 #endif
 #define tgetch getchar
 
-#define SHELL		/* do not delete the '!' command */
+/* #define SHELL		do not delete the '!' command */
 
 #include "system.h"
 
