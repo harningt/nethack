@@ -180,7 +180,9 @@
 #define DISP_CHANGE  (-4)  /* Change glyph. */
 #define DISP_END     (-5)  /* Clean up. */
 #define DISP_FREEMEM (-6)  /* Free all memory during exit only. */
-
+#ifdef WEBB_SEE_LIGHT
+#define DISP_ILLUM   (-7)  /* sets tmp visibility for glyphs */
+#endif
 
 /* Total number of cmap indices in the sheild_static[] array. */
 #define SHIELD_COUNT 21

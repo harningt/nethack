@@ -41,6 +41,11 @@ int expltype;
 		/* 0=normal explosion, 1=do shieldeff, 2=do nothing */
 	boolean shopdamage = FALSE;
 	boolean generic = FALSE;
+#ifdef WEBB_SEE_LIGHT
+  int abstyp = abs(type)%10;
+  int illuminating = !Blind &&
+    (abstyp == AD_FIRE - 1 || abstyp == AD_ELEC - 1);
+#endif
 
 	if (olet == WAND_CLASS)		/* retributive strike */
 		switch (Role_switch) {
@@ -173,7 +178,12 @@ int expltype;
 		    unmap_object(i+x-1, j+y-1);
 		    newsym(i+x-1, j+y-1);
 		}
+#ifdef WEBB_SEE_LIGHT
+    if (cansee(i+x-1, j+y-1) ||
+        (couldsee(i+x-1, j+y-1) && illuminating) ) visible = TRUE;
+#else
 		if (cansee(i+x-1, j+y-1)) visible = TRUE;
+#endif
 		if (explmask[i][j] == 1) any_shield = TRUE;
 	}
 
@@ -183,6 +193,10 @@ int expltype;
 			if (explmask[i][j] == 2) continue;
 			tmp_at(starting ? DISP_BEAM : DISP_CHANGE,
 				explosion_to_glyph(expltype,expl[i][j]));
+#ifdef WEBB_SEE_LIGHT
+      if (starting && illuminating)
+        tmp_at(DISP_ILLUM,0);
+#endif
 			tmp_at(i+x-1, j+y-1);
 			starting = 0;
 		}

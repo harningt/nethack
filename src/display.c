@@ -816,12 +816,22 @@ shieldeff(x,y)
  *		previous location's glyph.
  * DISP_ALWAYS- Like DISP_FLASH, but vision is not taken into account.
  */
+#ifdef WEBB_SEE_LIGHT
+ /*
+  * (DISP_ILLUM, 0) show glyphs even in dark room.
+  *     called directly after one of the initializing tmp_at calls.
+  *     this makes it so that the glyphs are seen even in the darkness
+  */
+#endif
 
 static struct tmp_glyph {
     coord saved[COLNO];	/* previously updated positions */
     int sidx;		/* index of next unused slot in saved[] */
     int style;		/* either DISP_BEAM or DISP_FLASH or DISP_ALWAYS */
     int glyph;		/* glyph to use when printing */
+#ifdef WEBB_SEE_LIGHT
+    int illuminating;
+#endif
     struct tmp_glyph *prev;
 } tgfirst;
 
@@ -845,9 +855,17 @@ tmp_at(x, y)
 	    tglyph->sidx = 0;
 	    tglyph->style = x;
 	    tglyph->glyph = y;
+#ifdef WEBB_SEE_LIGHT
+      tglyph->illuminating = 0;
+#endif
 	    flush_screen(0);	/* flush buffered glyphs */
 	    return;
 
+#ifdef WEBB_SEE_LIGHT
+    case DISP_ILLUM:
+      tglyph->illuminating = 1;
+      return;
+#endif
 	case DISP_FREEMEM:  /* in case game ends with tmp_at() in progress */
 	    while (tglyph) {
 		tmp = tglyph->prev;
@@ -886,6 +904,11 @@ tmp_at(x, y)
 
 	default:	/* do it */
 	    if (tglyph->style == DISP_BEAM) {
+#ifdef WEBB_SEE_LIGHT
+        if (tglyph->illuminating){
+          if (!couldsee(x,y)) break;
+        } else
+#endif
 		if (!cansee(x,y)) break;
 		/* save pos for later erasing */
 		tglyph->saved[tglyph->sidx].x = x;
@@ -896,6 +919,11 @@ tmp_at(x, y)
 		    newsym(tglyph->saved[0].x, tglyph->saved[0].y);
 		    tglyph->sidx = 0;	/* display is presently up to date */
 		}
+#ifdef WEBB_SEE_LIGHT
+        if (tglyph->illuminating){
+          if (!couldsee(x,y) && tglyph->style != DISP_ALWAYS) break;
+        } else
+#endif
 		if (!cansee(x,y) && tglyph->style != DISP_ALWAYS) break;
 		tglyph->saved[0].x = x;
 		tglyph->saved[0].y = y;
