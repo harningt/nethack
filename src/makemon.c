@@ -621,12 +621,27 @@ register struct	monst	*mtmp;
 		if (rn2(7)) (void)mongets(mtmp, MUMMY_WRAPPING);
 		break;
 	    case S_QUANTMECH:
+#if defined(WEBB_NAMED_MONSTERS)
+      {
+        char * ame = (mtmp->mnamelth &&
+            (uchar)NAME(mtmp)[0] > (uchar)0x80)?NAME(mtmp)+1:0;
+        if (ptr == &mons[PM_QUANTUM_MECHANIC]){
+          if (!rn2(20) || (ame && !strcmp(ame,"rwin") && rn2(20))) {
+            otmp = mksobj(LARGE_BOX, FALSE, FALSE);
+            otmp->spe = 1; /* flag for special box */
+            otmp->owt = weight(otmp);
+            (void) mpickobj(mtmp, otmp);
+          }
+        }
+      }
+#else
 		if (!rn2(20)) {
 			otmp = mksobj(LARGE_BOX, FALSE, FALSE);
 			otmp->spe = 1; /* flag for special box */
 			otmp->owt = weight(otmp);
 			(void) mpickobj(mtmp, otmp);
 		}
+#endif
 		break;
 	    case S_LEPRECHAUN:
 #ifndef GOLDOBJ
@@ -1021,6 +1036,13 @@ register int	mmflags;
 		flags.ghost_count++;
 		if (!(mmflags & MM_NONAME))
 			mtmp = christen_monst(mtmp, rndghostname());
+#ifdef WEBB_NAMED_MONSTERS
+   } else if (mndx == PM_QUANTUM_MECHANIC ) {
+     if(!(mmflags & MM_NONAME))
+       mtmp = christen_monst(mtmp, monst_rnd_name(mndx, mtmp->female));
+   } else if (mndx == PM_ERINYS && countbirth){ /* ignore MM_NONAME */
+     mtmp = christen_monst(mtmp, monst_rnd_name(mndx, 1));
+#endif
 	} else if (mndx == PM_VLAD_THE_IMPALER) {
 		mitem = CANDELABRUM_OF_INVOCATION;
 	} else if (mndx == PM_CROESUS) {

@@ -670,6 +670,20 @@ register struct monst *mtmp;
 		if (In_endgame(&u.uz) && is_mplayer(ptr)) {
 		    mplayer_talk(mtmp);
 		    break;
+#if defined(WEBB_NAMED_MONSTERS)
+        } else if (mtmp->mnamelth && (uchar)NAME(mtmp)[0] >= (uchar)0x80){
+          introduce_mons(mtmp);
+          if (ptr == &mons[PM_QUANTUM_MECHANIC])
+            verbalize("I'm %s, are you ready for the quantum immortality experiment?", NAME(mtmp));
+          else
+            verbalize("Hello, my name is %s. Prepare to die.", NAME(mtmp));
+            /* Princess Bride*/
+          break;
+        } else if (ptr == &mons[PM_QUANTUM_MECHANIC] &&
+            !strcmp(NAME(mtmp), "Sam")){
+          verbalize("Oh, boy.");
+          break;
+#endif
 		} else return 0;	/* no sound */
 	    }
 	    /* Generic peaceful humanoid behaviour. */
@@ -692,6 +706,18 @@ register struct monst *mtmp;
 						moves > EDOG(mtmp)->hungrytime)
 		verbl_msg = "I'm hungry.";
 	    /* Specific monsters' interests */
+#if defined(WEBB_NAMED_MONSTERS)
+      else if (mtmp->mnamelth && (uchar)NAME(mtmp)[0] >= (uchar)0x80){
+        introduce_mons(mtmp);
+        verbalize("%s, I'm %s.  %s", Hello(mtmp), NAME(mtmp),
+            (ptr == &mons[PM_QUANTUM_MECHANIC])?
+            "Please come back during my office hours.":
+            (Inhell)?"Hot enough for ya?":"Dank enough for ya?");
+      } else if (ptr == &mons[PM_QUANTUM_MECHANIC] &&
+          !strcmp(NAME(mtmp), "Sam")){
+        verbl_msg = "Oh, boy.";
+      }
+#endif
 	    else if (is_elf(ptr))
 		pline_msg = "curses orcs.";
 	    else if (is_dwarf(ptr))

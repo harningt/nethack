@@ -221,6 +221,17 @@ const char *name;
 	return(mtmp2);
 }
 
+#if defined(WEBB_NAMED_MONSTERS)
+void
+introduce_mons(mtmp)
+struct monst * mtmp;
+{
+  char * name = NAME(mtmp);
+  if (name && (uchar) name[0] >= (uchar)0x80)
+     name[0] &= 0x7F;
+}
+#endif
+
 int
 do_mname()
 {
@@ -548,6 +559,70 @@ rndghostname()
     return rn2(7) ? ghostnames[rn2(SIZE(ghostnames))] : (const char *)plname;
 }
 
+#if defined(WEBB_NAMED_MONSTERS)
+static char * erinysnames[] = {
+  "\301lecto",
+  "\315egaera",
+  "\324isiphone"
+};
+
+static int erinys_shuffled = FALSE;
+
+static const char * qmnames[] = {
+  "\302uckaroo",  /* B. Banzai */
+  "\304ick",      /* D. Feynman */
+  "\305rwin",     /* E. Schroedinger */
+  "\314ouis",     /* L. de Broglie */
+  "\315ax",       /* M. Born, M. Planck */
+  "\316iels",     /* N. Bohr */
+  "\320ascual",   /* P. Jordan */
+  "\320aul",      /* P. Dirac */
+  "\323am",       /* S. Beckett */
+  "\323atyen",    /* Satyendra Bose */
+  "\323ephen",    /* S. Hawking */
+  "\327erner",    /* W. Heisenberg */
+  "\327olfgang",  /* W. Pauli */
+  "\305nrico",    /* E. Fermi */
+
+  "\315arie",     /* M. Curie */
+  "\314ise",      /* L. Meitner */
+};
+
+
+const char *
+monst_rnd_name(mtype, gender)
+int mtype, gender;
+{
+  char * empty  = "";
+  switch (mtype){
+    case PM_QUANTUM_MECHANIC:
+      if (gender)
+        return (rn2(3))?empty:qmnames[SIZE(qmnames)-rnd(2)];
+      return ((rn2(3))?qmnames[rn2(SIZE(qmnames)-2)]:empty);
+      break;
+    case PM_ERINYS:
+      if (mvitals[PM_ERINYS].born > 3) return empty;
+      else if (!erinys_shuffled){
+        char * swap;
+        int index, i, seed = (u.ubirthday/10)%6; /* 6 = 3! */
+        for (i = 2; i > 0; --i){
+          index = seed%(i+1);
+          seed /= (i+1);
+          swap = erinysnames[i];
+          erinysnames[i] = erinysnames[index];
+          erinysnames[index] = swap;
+        }
+        erinys_shuffled = TRUE;
+      }
+      return erinysnames[ mvitals[PM_ERINYS].born - 1 ];
+      break;
+    default:
+      return empty;
+  }
+}
+
+#endif
+
 /* Monster naming functions:
  * x_monnam is the generic monster-naming function.
  *		  seen	      unseen	   detected		  named
@@ -679,9 +754,16 @@ boolean called;
 	/* Put the actual monster name or type into the buffer now */
 	/* Be sure to remember whether the buffer starts with a name */
 	if (do_hallu) {
+
+
+
 	    Strcat(buf, rndmonnam());
 	    name_at_start = FALSE;
+#if defined(WEBB_NAMED_MONSTERS)
+  } else if (mtmp->mnamelth && (uchar)NAME(mtmp)[0]<(uchar)0x80) {
+#else
 	} else if (mtmp->mnamelth) {
+#endif
 	    char *name = NAME(mtmp);
 
 	    if (mdat == &mons[PM_GHOST]) {

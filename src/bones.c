@@ -231,6 +231,10 @@ struct obj *corpse;
 		    mptr->msound == MS_NEMESIS || mptr->msound == MS_LEADER ||
 		    mptr == &mons[PM_VLAD_THE_IMPALER])
 		mongone(mtmp);
+#ifdef WEBB_NAMED_MONSTERS
+     else if (mtmp->mnamelth && (uchar)NAME(mtmp)[0]>(uchar)0x80)
+       christen_monst(mtmp, "");
+#endif
 	}
 #ifdef STEED
 	if (u.usteed) dismount_steed(DISMOUNT_BONES);

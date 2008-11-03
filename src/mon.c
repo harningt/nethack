@@ -299,7 +299,11 @@ register struct monst *mtmp;
 	   prevent the same attack beam from hitting its corpse */
 	if (flags.bypasses) bypass_obj(obj);
 
-	if (mtmp->mnamelth)
+  if (mtmp->mnamelth
+#if defined(WEBB_BIODIVERSITY) || defined(WEBB_NAMED_MONSTERS)
+      && (uchar)NAME(mtmp)[0] < (uchar) 0x80
+#endif
+     )
 	    obj = oname(obj, NAME(mtmp));
 
 	/* Avoid "It was hidden under a green mold corpse!" 
@@ -1641,6 +1645,11 @@ register struct monst *mdef;
 		   item-conferred attributes */
 		otmp = mkcorpstat(STATUE, KEEPTRAITS(mdef) ? mdef : 0,
 				  mdef->data, x, y, FALSE);
+		if (mdef->mnamelth
+#if defined(WEBB_BIODIVERSITY) || defined(WEBB_NAMED_MONSTERS)
+                     && ((uchar)NAME(mdef)[0]) < (uchar)0x80
+#endif
+          ) otmp = oname(otmp, NAME(mdef));
 		if (mdef->mnamelth) otmp = oname(otmp, NAME(mdef));
 		while ((obj = oldminvent) != 0) {
 		    oldminvent = obj->nobj;

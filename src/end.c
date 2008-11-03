@@ -220,8 +220,13 @@ register struct monst *mtmp;
 		Strcat(buf, killer);
 	} else {
 		Strcat(buf, mtmp->data->mname);
-		if (mtmp->mnamelth)
+      if (mtmp->mnamelth
+#if defined(WEBB_NAMED_MONSTERS)
+          && (uchar)NAME(mtmp)[0]<(uchar)0x80
+#endif
+          ) {
 		    Sprintf(eos(buf), " called %s", NAME(mtmp));
+	}
 	}
 
 	if (multi) Strcat(buf, ", while helpless");

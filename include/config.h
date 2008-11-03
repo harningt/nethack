@@ -350,6 +350,7 @@ typedef unsigned char	uchar;
 
 /*#define GOLDOBJ */	/* Gold is kept on obj chains - Helge Hafting */
 /*#define AUTOPICKUP_EXCEPTIONS */ /* exceptions to autopickup */
+#define WEBB_NAMED_MONSTERS
 
 /* End of Section 5 */
 

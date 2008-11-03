@@ -321,6 +321,10 @@ E void NDECL(heal_legs);
 
 E int FDECL(getpos, (coord *,BOOLEAN_P,const char *));
 E struct monst *FDECL(christen_monst, (struct monst *,const char *));
+#if defined(WEBB_NAMED_MONSTERS)
+E void FDECL(introduce_mons, (struct monst *));
+E const char * FDECL(monst_rnd_name,(int, int));
+#endif
 E int NDECL(do_mname);
 E struct obj *FDECL(oname, (struct obj *,const char *));
 E int NDECL(ddocall);

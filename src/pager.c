@@ -127,6 +127,12 @@ lookat(x, y, buf, monbuf)
 	if (mtmp != (struct monst *) 0) {
 	    char *name, monnambuf[BUFSZ];
 	    boolean accurate = !Hallucination;
+#if defined(WEBB_NAMED_MONSTERS)
+      /* You read their mind, you learn an unknown name */
+      if (mtmp->mnamelth  && (uchar)(name = NAME(mtmp))[0] >= (uchar)0x80 &&
+          accurate && (tp_sensemon(mtmp)) )
+        introduce_mons(mtmp);
+#endif
 
 	    if (mtmp->data == &mons[PM_COYOTE] && accurate)
 		name = coyotename(mtmp, monnambuf);

@@ -277,6 +277,10 @@ boolean ghostly;
 				/* cookie to trigger purge in getbones() */
 				mtmp->mhpmax = DEFUNCT_MONSTER;	
 			}
+#if defined(WEBB_NAMED_MONSTERS)
+         else if (mndx == PM_ERINYS) /* ignore MM_NONAME */
+           mtmp = christen_monst(mtmp, monst_rnd_name(mndx, 1));
+#endif
 		}
 		if(mtmp->minvent) {
 			struct obj *obj;
