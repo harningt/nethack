@@ -2664,6 +2664,11 @@ struct obj *obj;			/* object tossed/used */
 	    tmp_at(DISP_BEAM, cmap_to_glyph(S_flashbeam));
 	} else if (weapon != ZAPPED_WAND && weapon != INVIS_BEAM)
 	    tmp_at(DISP_FLASH, obj_to_glyph(obj));
+#ifdef WEBB_SEE_LIGHT
+  if (!Blind && ( weapon == FLASHED_LIGHT || ( obj->lamplit &&
+        (weapon == THROWN_WEAPON || weapon == KICKED_WEAPON))))
+    tmp_at(DISP_ILLUM, 0);
+#endif
 
 	while(range-- > 0) {
 	    int x,y;
@@ -3308,6 +3313,9 @@ register int dx,dy;
     register const char *fltxt;
     struct obj *otmp;
     int spell_type;
+#ifdef WEBB_SEE_LIGHT
+  int illuminating;
+#endif
 
     /* if its a Hero Spell then get its SPE_TYPE */
     spell_type = is_hero_spell(type) ? SPE_MAGIC_MISSILE + abstype : 0;
@@ -3334,12 +3342,22 @@ register int dx,dy;
     save_bhitpos = bhitpos;
 
     tmp_at(DISP_BEAM, zapdir_to_glyph(dx, dy, abstype));
+#ifdef WEBB_SEE_LIGHT
+  illuminating = !Blind && (abstype == ZT_FIRE || abstype == ZT_LIGHTNING);
+  if (illuminating)
+    tmp_at(DISP_ILLUM,0);
+#endif
+
     while(range-- > 0) {
 	lsx = sx; sx += dx;
 	lsy = sy; sy += dy;
 	if(isok(sx,sy) && (lev = &levl[sx][sy])->typ) {
 	    mon = m_at(sx, sy);
+#ifdef WEBB_SEE_LIGHT
+      if((illuminating && couldsee(sx,sy)) || cansee(sx,sy)) {
+#else
 	    if(cansee(sx,sy)) {
+#endif
 		/* reveal/unreveal invisible monsters before tmp_at() */
 		if (mon && !canspotmon(mon))
 		    map_invisible(sx, sy);
@@ -3347,7 +3365,12 @@ register int dx,dy;
 		    unmap_object(sx, sy);
 		    newsym(sx, sy);
 		}
+#ifdef WEBB_SEE_LIGHT
+        if(ZAP_POS(lev->typ) || cansee(lsx,lsy) ||
+            (illuminating && couldsee(lsx,lsy)) )
+#else
 		if(ZAP_POS(lev->typ) || cansee(lsx,lsy))
+#endif
 		    tmp_at(sx,sy);
 		delay_output(); /* wait a little */
 	    }
