@@ -607,13 +607,6 @@ int oldlevel, newlevel;
 		postadjabil(abil->ability);
 	    abil++;
 	}
-
-	if (oldlevel > 0) {
-	    if (newlevel > oldlevel)
-		add_weapon_skill(newlevel - oldlevel);
-	    else
-		lose_weapon_skill(oldlevel - newlevel);
-	}
 }
 
 

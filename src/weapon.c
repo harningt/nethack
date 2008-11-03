@@ -95,9 +95,7 @@ int skill;
 #endif	/* OVLB */
 
 STATIC_DCL boolean FDECL(can_advance, (int, BOOLEAN_P));
-STATIC_DCL boolean FDECL(could_advance, (int));
 STATIC_DCL boolean FDECL(peaked_skill, (int));
-STATIC_DCL int FDECL(slots_required, (int));
 
 #ifdef OVL1
 
@@ -752,31 +750,6 @@ char *buf;
     return buf;
 }
 
-/* return the # of slots required to advance the skill */
-STATIC_OVL int
-slots_required(skill)
-int skill;
-{
-    int tmp = P_SKILL(skill);
-
-    /* The more difficult the training, the more slots it takes.
-     *	unskilled -> basic	1
-     *	basic -> skilled	2
-     *	skilled -> expert	3
-     */
-    if (skill <= P_LAST_WEAPON || skill == P_TWO_WEAPON_COMBAT)
-	return tmp;
-
-    /* Fewer slots used up for unarmed or martial.
-     *	unskilled -> basic	1
-     *	basic -> skilled	1
-     *	skilled -> expert	2
-     *	expert -> master	2
-     *	master -> grand master	3
-     */
-    return (tmp + 1) / 2;
-}
-
 /* return true if this skill can be advanced */
 /*ARGSUSED*/
 STATIC_OVL boolean
@@ -790,21 +763,7 @@ boolean speedy;
 	    (wizard && speedy) ||
 #endif
 	    (P_ADVANCE(skill) >=
-		(unsigned) practice_needed_to_advance(P_SKILL(skill))
-	    && u.skills_advanced < P_SKILL_LIMIT
-	    && u.weapon_slots >= slots_required(skill)));
-}
-
-/* return true if this skill could be advanced if more slots were available */
-STATIC_OVL boolean
-could_advance(skill)
-int skill;
-{
-    return !P_RESTRICTED(skill)
-	    && P_SKILL(skill) < P_MAX_SKILL(skill) && (
-	    (P_ADVANCE(skill) >=
-		(unsigned) practice_needed_to_advance(P_SKILL(skill))
-	    && u.skills_advanced < P_SKILL_LIMIT));
+		(unsigned) practice_needed_to_advance(P_SKILL(skill))));
 }
 
 /* return true if this skill has reached its maximum and there's been enough
@@ -823,9 +782,7 @@ STATIC_OVL void
 skill_advance(skill)
 int skill;
 {
-    u.weapon_slots -= slots_required(skill);
     P_SKILL(skill)++;
-    u.skill_record[u.skills_advanced++] = skill;
     /* subtly change the advance message to indicate no more advancement */
     You("are now %s skilled in %s.",
 	P_SKILL(skill) >= P_MAX_SKILL(skill) ? "most" : "more",
@@ -853,7 +810,7 @@ int
 enhance_weapon_skill()
 {
     int pass, i, n, len, longest,
-	to_advance, eventually_advance, maxxed_cnt;
+	to_advance, maxxed_cnt;
     char buf[BUFSZ], sklnambuf[BUFSZ];
     const char *prefix;
     menu_item *selected;
@@ -868,13 +825,12 @@ enhance_weapon_skill()
 
 	do {
 	    /* find longest available skill name, count those that can advance */
-	    to_advance = eventually_advance = maxxed_cnt = 0;
+	    to_advance = maxxed_cnt = 0;
 	    for (longest = 0, i = 0; i < P_NUM_SKILLS; i++) {
 		if (P_RESTRICTED(i)) continue;
 		if ((len = strlen(P_NAME(i))) > longest)
 		    longest = len;
 		if (can_advance(i, speedy)) to_advance++;
-		else if (could_advance(i)) eventually_advance++;
 		else if (peaked_skill(i)) maxxed_cnt++;
 	    }
 
@@ -882,19 +838,9 @@ enhance_weapon_skill()
 	    start_menu(win);
 
 	    /* start with a legend if any entries will be annotated
-	       with "*" or "#" below */
-	    if (eventually_advance > 0 || maxxed_cnt > 0) {
+	       with "#" below */
+	    if (maxxed_cnt > 0) {
 		any.a_void = 0;
-		if (eventually_advance > 0) {
-		    Sprintf(buf,
-			    "(Skill%s flagged by \"*\" may be enhanced %s.)",
-			    plur(eventually_advance),
-			    (u.ulevel < MAXULEV) ?
-				"when you're more experienced" :
-				"if skill slots become available");
-		    add_menu(win, NO_GLYPH, &any, 0, 0, ATR_NONE,
-			     buf, MENU_UNSELECTED);
-		}
 		if (maxxed_cnt > 0) {
 		    Sprintf(buf,
 		  "(Skill%s flagged by \"#\" cannot be enhanced any further.)",
@@ -929,13 +875,10 @@ enhance_weapon_skill()
 		 */
 		if (can_advance(i, speedy))
 		    prefix = "";	/* will be preceded by menu choice */
-		else if (could_advance(i))
-		    prefix = "  * ";
 		else if (peaked_skill(i))
 		    prefix = "  # ";
 		else
-		    prefix = (to_advance + eventually_advance +
-				maxxed_cnt > 0) ? "    " : "";
+		    prefix = (to_advance + maxxed_cnt > 0) ? "    " : "";
 		(void) skill_level_name(i, sklnambuf);
 #ifdef WIZARD
 		if (wizard) {
@@ -966,11 +909,6 @@ enhance_weapon_skill()
 
 	    Strcpy(buf, (to_advance > 0) ? "Pick a skill to advance:" :
 					   "Current skills:");
-#ifdef WIZARD
-	    if (wizard && !speedy)
-		Sprintf(eos(buf), "  (%d slot%s available)",
-			u.weapon_slots, plur(u.weapon_slots));
-#endif
 	    end_menu(win, buf);
 	    n = select_menu(win, to_advance ? PICK_ONE : PICK_NONE, &selected);
 	    destroy_nhwindow(win);
@@ -1019,46 +957,11 @@ int degree;
     if (skill != P_NONE && !P_RESTRICTED(skill)) {
 	advance_before = can_advance(skill, FALSE);
 	P_ADVANCE(skill)+=degree;
-	if (!advance_before && can_advance(skill, FALSE))
-	    give_may_advance_msg(skill);
-    }
-}
-
-void
-add_weapon_skill(n)
-int n;	/* number of slots to gain; normally one */
-{
-    int i, before, after;
-
-    for (i = 0, before = 0; i < P_NUM_SKILLS; i++)
-	if (can_advance(i, FALSE)) before++;
-    u.weapon_slots += n;
-    for (i = 0, after = 0; i < P_NUM_SKILLS; i++)
-	if (can_advance(i, FALSE)) after++;
-    if (before < after)
-	give_may_advance_msg(P_NONE);
-}
-
-void
-lose_weapon_skill(n)
-int n;	/* number of slots to lose; normally one */
-{
-    int skill;
-
-    while (--n >= 0) {
-	/* deduct first from unused slots, then from last placed slot, if any */
-	if (u.weapon_slots) {
-	    u.weapon_slots--;
-	} else if (u.skills_advanced) {
-	    skill = u.skill_record[--u.skills_advanced];
-	    if (P_SKILL(skill) <= P_UNSKILLED)
-		panic("lose_weapon_skill (%d)", skill);
-	    P_SKILL(skill)--;	/* drop skill one level */
-	    /* Lost skill might have taken more than one slot; refund rest. */
-	    u.weapon_slots = slots_required(skill) - 1;
-	    /* It might now be possible to advance some other pending
-	       skill by using the refunded slots, but giving a message
-	       to that effect would seem pretty confusing.... */
+	if (can_advance(skill, FALSE)) {
+	    if (flags.autoenhance)
+		skill_advance(skill);
+	    else if (!advance_before)
+		give_may_advance_msg(skill);
 	}
     }
 }

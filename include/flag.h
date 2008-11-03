@@ -23,6 +23,7 @@ struct flag {
 	boolean  asksavedisk;
 #endif
 	boolean  autodig;       /* MRKR: Automatically dig */
+	boolean  autoenhance;   /* Automatically enhance skills */
 	boolean  autoquiver;	/* Automatically fill quiver */
 	boolean  beginner;
 #ifdef MAIL
