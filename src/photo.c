@@ -1529,6 +1529,10 @@ struct obj* obj;
 	bhitpos.y = sy;
 
     tmp_at(DISP_BEAM, cmap_to_glyph(S_flashbeam));
+#ifdef WEBB_SEE_LIGHT
+	if (!Blind)
+	    tmp_at(DISP_ILLUM, 0);
+#endif
 
 	while(range-- > 0) {
 	    int x,y;
