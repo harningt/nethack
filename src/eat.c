@@ -3,6 +3,9 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
+#ifdef WEBB_TIN_OPENER
+#include "edog.h"
+#endif
 /* #define DEBUG */	/* uncomment to enable new eat code debugging */
 
 #ifdef DEBUG
@@ -1034,6 +1037,31 @@ opentin()		/* called during each move whilst opening a tin */
 		costly_tin("destroyed");
 		goto use_me;
 	}
+#ifdef WEBB_TIN_OPENER
+   if (uwep && uwep->otyp == TIN_OPENER && !metallivorous(youmonst.data)){
+     int cat_cnt = 0;
+     struct monst * mtmp, * nextmon;
+     for(mtmp = fmon; mtmp; mtmp = nextmon) {
+       nextmon = mtmp->nmon; /* trap might kill mon */
+       if (DEADMONSTER(mtmp)) continue;
+       if (mtmp->data == &mons[PM_KITTEN] ||
+           mtmp->data == &mons[PM_HOUSECAT] ||
+           mtmp->data == &mons[PM_LARGE_CAT]){
+         ++cat_cnt;
+         mtmp->msleeping = 0;
+         if (mtmp->mtame && !mtmp->mtrapped) {
+           mnexto(mtmp);
+           if (mintrap(mtmp) == 2) change_luck(-1);
+           /* makes them a little bit hungrier. */
+           EDOG(mtmp)->hungrytime -= objects[TRIPE_RATION].oc_nutrition*3;
+         }
+       }
+     }
+     if (!cat_cnt && !rn2(5)) makemon(!rn2(3) ? &mons[PM_KITTEN] :
+         rn2(2) ? &mons[PM_HOUSECAT] : &mons[PM_LARGE_CAT],
+         0, 0, MM_ADJACENTOK);
+   }
+#endif
 	You("succeed in opening the tin.");
 	if(tin.tin->spe != 1) {
 	    if (tin.tin->corpsenm == NON_PM) {
