@@ -20,6 +20,164 @@ STATIC_DCL void FDECL(show_map_spot, (int,int));
 STATIC_PTR void FDECL(findone,(int,int,genericptr_t));
 STATIC_PTR void FDECL(openone,(int,int,genericptr_t));
 
+#ifdef LISTMONS
+#define LM_PLINELIM 4 /* # of uniquely identifiable monsters needed for
+		         showing in a separate window. */
+
+struct _listmons {
+    struct _listmons *next;
+    xchar prefix;  /* 0 = no prefix, 1 = an(), 2 = the() */
+    int nummons;
+    char *name;
+};
+
+static struct {
+    struct _listmons *mlist;
+    long diffmons, allmons;
+    boolean see;
+} monlist = {
+    0, 0, 0, TRUE
+};
+
+void
+add_str_listmons(str, prefix)
+char *str;
+xchar prefix;
+{
+    struct _listmons *tmp;
+
+    monlist.allmons++;
+
+    for (tmp = monlist.mlist; tmp; tmp = tmp->next) {
+	if (!strcmp(tmp->name, str)) {
+	    tmp->nummons++;
+	    return;
+	}
+    }
+    tmp = (struct _listmons *) alloc(sizeof(struct _listmons));
+    tmp->next = monlist.mlist;
+    tmp->nummons = 1;
+    tmp->prefix = prefix;
+    tmp->name = (char *) alloc(strlen(str)+1);
+    (void) memcpy((genericptr_t)tmp->name, (genericptr_t)str, strlen(str)+1);
+    monlist.mlist = tmp;
+    monlist.diffmons++;
+}
+
+void
+free_listmons()
+{
+    struct _listmons *tmp = monlist.mlist;
+
+    while (tmp) {
+	struct _listmons *tmp2 = tmp->next;
+	free(tmp->name);
+	free(tmp);
+	tmp = tmp2;
+    }
+
+    monlist.mlist = (struct _listmons *)0;
+    monlist.diffmons = monlist.allmons = 0;
+    monlist.see = TRUE;
+}
+
+void
+show_listmons()
+{
+    struct _listmons *tmp;
+    char buf[BUFSZ];
+
+    if (monlist.allmons < 1) {
+	You(canseeself() ? "don't see any monsters." :
+			   "can't even see yourself.");
+	return;
+    }
+
+    if (monlist.diffmons >= LM_PLINELIM) {
+	/* show the monsters in a window */
+	winid win = create_nhwindow(NHW_MENU);
+	Sprintf(buf, "You can %s %li creatures:",
+		monlist.see ? "see" : "sense",
+		monlist.allmons);
+	putstr(win, 0, buf);
+	putstr(win, 0, "");
+	for (tmp = monlist.mlist; tmp; tmp = tmp->next) {
+	    if (tmp->nummons > 1) {
+		Sprintf(buf, "%i %s", tmp->nummons, makeplural(tmp->name));
+		putstr(win, 0, buf);
+	    } else {
+		switch (tmp->prefix) {
+		case 2:  putstr(win, 0, the(tmp->name)); break;
+		case 1:  putstr(win, 0, an(tmp->name));  break;
+		default: putstr(win, 0, tmp->name);      break;
+		}
+	    }
+	}
+	display_nhwindow(win, FALSE);
+	destroy_nhwindow(win);
+    } else {
+	/* just pline() the monsters */
+	long allmon = monlist.allmons;
+	Sprintf(buf, "%s%s ",
+		(monlist.allmons == 1) ? "only " : "",
+		monlist.see ? "see" : "sense");
+	for (tmp = monlist.mlist; tmp; tmp = tmp->next) {
+	    allmon -= tmp->nummons;
+	    if (tmp != monlist.mlist)
+		Sprintf(eos(buf),"%s", (allmon) ? ", " : " and ");
+	    if (tmp->nummons > 1) {
+		Sprintf(eos(buf), "%i %s", tmp->nummons, makeplural(tmp->name));
+	    } else {
+		switch (tmp->prefix) {
+		case 2:  Sprintf(eos(buf), "%s", the(tmp->name)); break;
+		case 1:  Sprintf(eos(buf), "%s", an(tmp->name));  break;
+		default: Sprintf(eos(buf), "%s", tmp->name);      break;
+		}
+	    }
+	}
+	You("can %s.", buf);
+    }
+}
+
+int
+dolistmons()
+{
+    struct monst *mtmp;
+    char buf[BUFSZ];
+
+    /* It would be too easy to see the funny hallucinatory monsters
+     * for example in the bigroom, and this function doesn't give
+     * any real information while you're hallucinating anyway.
+     */
+    if (Hallucination) {
+	You("can't bear to look at all those evil monsters!");
+	return 0;
+    }
+
+    for (mtmp = fmon; mtmp; mtmp = mtmp->nmon) {
+	register int sensed = (canspotmon(mtmp) &&
+		((mtmp->m_ap_type == M_AP_NOTHING) || sensemon(mtmp)));
+	if (sensed) {
+	    boolean is_uniq = !!(mons[mtmp->mnum].geno & G_UNIQ);
+	    if (mtmp->mtame)
+		Sprintf(buf, "tame ");
+	    else if (mtmp->mpeaceful)
+		Sprintf(buf, "peaceful ");
+	    else buf[0] = '\0';
+
+	    Sprintf(eos(buf), "%s", l_monnam(mtmp));
+
+	    if (!canseemon(mtmp)) monlist.see = FALSE;
+
+	    add_str_listmons(&buf[0], (is_uniq || mtmp->isshk) ? 2 : 1);
+	}
+    }
+    show_listmons();
+    free_listmons();
+    return 0;
+}
+#endif /*LISTMONS*/
+
 /* Recursively search obj for an object in class oclass and return 1st found */
 struct obj *
 o_in(obj, oclass)

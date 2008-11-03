@@ -348,6 +348,7 @@ typedef unsigned char	uchar;
  * bugs left here.
  */
 
+#define LISTMONS	/* #listmons -extended command */
 /*#define GOLDOBJ */	/* Gold is kept on obj chains - Helge Hafting */
 /*#define AUTOPICKUP_EXCEPTIONS */ /* exceptions to autopickup */
 
