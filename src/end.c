@@ -924,7 +924,11 @@ boolean identified, all_containers;
 	char buf[BUFSZ];
 
 	for (box = list; box; box = box->nobj) {
-	    if (Is_container(box) || box->otyp == STATUE) {
+	    if (Is_container(box) || box->otyp == STATUE
+#ifdef PHOTOGRAPHY
+			|| box->otyp==SPE_PHOTO_ALBUM
+#endif
+			) {
 		if (box->otyp == BAG_OF_TRICKS) {
 		    continue;	/* wrong type of container */
 		} else if (box->cobj) {

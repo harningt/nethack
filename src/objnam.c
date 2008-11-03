@@ -403,6 +403,12 @@ register struct obj *obj;
 		}
 		break;
 	case SCROLL_CLASS:
+#ifdef PHOTOGRAPHY
+		if(typ == SCR_PHOTOGRAPH) {
+			Strcpy(buf, obj->dknown ? glance_photo(PHOTOGRAPH(obj)):"photograph");
+			break;
+		}
+#endif
 		Strcpy(buf, "scroll");
 		if(!obj->dknown) break;
 		if(nn) {
@@ -431,7 +437,15 @@ register struct obj *obj;
 		break;
 	case SPBOOK_CLASS:
 		if (!obj->dknown) {
-			Strcpy(buf, "spellbook");
+			Strcpy(buf, "book");
+#ifdef PHOTOGRAPHY
+		} else if(typ == SPE_PHOTO_ALBUM) {
+			if(nn || !un) {
+				Strcpy(buf, nn ? actualn:dn);
+			} else {
+				Sprintf(buf, "book called %s",un);
+			}
+#endif
 		} else if (nn) {
 			if (typ != SPE_BOOK_OF_THE_DEAD)
 			    Strcpy(buf, "spellbook of ");

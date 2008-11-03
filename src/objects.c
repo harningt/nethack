@@ -784,7 +784,13 @@ POTION("water", "clear",                0, 0,          92, 100, CLR_CYAN),
 #ifdef MAIL
 	SCROLL("mail",                  "stamped",          0,   0,   0),
 #endif
+#ifdef PHOTOGRAPHY
+	OBJECT(OBJ("photograph","photograph"),BITS(0,0,0,0,0,0,0,0,0,0,0,P_NONE,PLASTIC),0,
+		SCROLL_CLASS,3,0,1,0,0,0,0,0,0,CLR_GREEN),
+	SCROLL("blank paper",           "unlabeled",        0,  25,  60),
+#else
 	SCROLL("blank paper",           "unlabeled",        0,  28,  60),
+#endif
 #undef SCROLL
 
 /* spellbooks ... */
@@ -836,8 +842,14 @@ SPELL("stone to flesh",	 "thick",       P_HEALING_SPELL, 15,  1, 3, 1, IMMEDIATE
 SPELL("flame sphere",    "canvas",      P_MATTER_SPELL, 20,  2, 1, 1, NODIR, CLR_BROWN),
 SPELL("freeze sphere",   "hardcover",   P_MATTER_SPELL, 20,  2, 1, 1, NODIR, CLR_BROWN),
 #endif
+#ifdef PHOTOGRAPHY
+OBJECT(OBJ("photo album","photo album"), BITS(0,0,0,0,0,0,0,0,0,0,0,P_NONE,LEATHER), 0,
+	   SPBOOK_CLASS,3,0,20,90,0,0,0,0,15,CLR_ORANGE),
+SPELL("blank paper",     "plain",       P_NONE, 15,  0, 0, 0, 0,         HI_PAPER),
+#else
 /* blank spellbook must come last because it retains its description */
 SPELL("blank paper",     "plain",       P_NONE, 18,  0, 0, 0, 0,         HI_PAPER),
+#endif
 /* a special, one of a kind, spellbook */
 OBJECT(OBJ("Book of the Dead", "papyrus"), BITS(0,0,1,0,1,0,1,1,0,0,0,P_NONE,PAPER), 0,
 	SPBOOK_CLASS, 0, 0,20, 10000, 0, 0, 0, 7, 20, HI_PAPER),

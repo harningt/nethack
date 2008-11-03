@@ -28,7 +28,12 @@ typedef void FDECL((*timeout_proc), (genericptr_t, long));
 #define BURN_OBJECT	3
 #define HATCH_EGG	4
 #define FIG_TRANSFORM	5
+#ifdef PHOTOGRAPHY
+#define TAKE_PICTURE	6
+#define NUM_TIME_FUNCS	7
+#else
 #define NUM_TIME_FUNCS	6
+#endif
 
 /* used in timeout.c */
 typedef struct fe {

@@ -9,11 +9,11 @@
 
 static const char tools[] = { TOOL_CLASS, WEAPON_CLASS, WAND_CLASS, 0 };
 static const char tools_too[] = { ALL_CLASSES, TOOL_CLASS, POTION_CLASS,
-				  WEAPON_CLASS, WAND_CLASS, GEM_CLASS, 0 };
-
-#ifdef TOURIST
-STATIC_DCL int FDECL(use_camera, (struct obj *));
+				  WEAPON_CLASS, WAND_CLASS, GEM_CLASS,
+#ifdef PHOTOGRAPHY
+				  SPBOOK_CLASS,
 #endif
+				  0 };
 STATIC_DCL int FDECL(use_towel, (struct obj *));
 STATIC_DCL boolean FDECL(its_dead, (int,int,int *));
 STATIC_DCL int FDECL(use_stethoscope, (struct obj *));
@@ -49,9 +49,16 @@ void FDECL( amii_speaker, ( struct obj *, char *, int ) );
 static const char no_elbow_room[] = "don't have enough elbow-room to maneuver.";
 
 #ifdef TOURIST
-STATIC_OVL int
+#ifdef PHOTOGRAPHY
+int
+use_camera(obj,brightflash)
+	struct obj *obj;
+	boolean brightflash;
+#else
+int
 use_camera(obj)
 	struct obj *obj;
+#endif
 {
 	register struct monst *mtmp;
 
@@ -65,8 +72,12 @@ use_camera(obj)
 		pline(nothing_happens);
 		return (1);
 	}
+#ifdef PHOTOGRAPHY
+	obj_stop_timers(obj);
+	take_picture2(obj,u.dx,u.dy,u.dz,brightflash,FALSE);
+	return (1);
+#else
 	consume_obj_charge(obj, TRUE);
-
 	if (obj->cursed && !rn2(2)) {
 		(void) zapyourself(obj, TRUE);
 	} else if (u.uswallow) {
@@ -85,6 +96,7 @@ use_camera(obj)
 		(void) flash_hits_mon(mtmp, obj);
 	}
 	return 1;
+#endif
 }
 #endif
 
@@ -2785,7 +2797,11 @@ doapply()
 
 	if(check_capacity((char *)0)) return (0);
 
-	if (carrying(POT_OIL) || uhave_graystone())
+	if (carrying(POT_OIL) || uhave_graystone()
+#ifdef PHOTOGRAPHY
+		|| carrying(SPE_PHOTO_ALBUM)
+#endif
+		)
 		Strcpy(class_list, tools_too);
 	else
 		Strcpy(class_list, tools);
@@ -2823,6 +2839,9 @@ doapply()
 	case GRAPPLING_HOOK:
 		res = use_grapple(obj);
 		break;
+#ifdef PHOTOGRAPHY
+	case SPE_PHOTO_ALBUM:
+#endif
 	case LARGE_BOX:
 	case CHEST:
 	case ICE_BOX:
@@ -2913,8 +2932,12 @@ doapply()
 		break;
 #ifdef TOURIST
 	case EXPENSIVE_CAMERA:
+#ifdef PHOTOGRAPHY
+		res = use_camera(obj,FALSE);
+#else
 		res = use_camera(obj);
-		break;
+#endif
+	break;
 #endif
 	case TOWEL:
 		res = use_towel(obj);

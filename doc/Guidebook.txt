@@ -146,7 +146,8 @@
 
                Tourists start out with lots of gold (suitable for  shopping
           with),  a  credit card, lots of food, some maps, and an expensive
-          camera.  Most monsters don't like being photographed.
+          camera.  Most monsters don't like being  dazzled by the  camera's
+          flash attachment.
 
                Valkyries are hardy warrior women.  Their upbringing in  the
           harsh  Northlands  makes  them strong, inures them to extremes of
@@ -802,7 +803,8 @@
           ^X   Display your name, role, race, gender, and alignment as well
                as the various deities in your game.
 
-          z    Zap a wand.  To aim at yourself, use `.' for the  direction.
+          z    Zap  a wand or use a camera with the  flash attachment.
+               To aim at yourself, use `.' for the direction.
 
           Z    Zap  (cast)  a  spell.  To cast at yourself, use `.' for the
                direction.
@@ -931,6 +933,9 @@
           #rub Rub a lamp or a stone.
 
           #sit Sit down.
+
+          #timer
+               Set or disable the timer on a camera.
 
           #turn
                Turn undead.

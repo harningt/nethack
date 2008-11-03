@@ -867,6 +867,10 @@ register const char *let,*word;
 		|| (!strcmp(word, "write with") &&
 		    (otmp->oclass == TOOL_CLASS &&
 		     otyp != MAGIC_MARKER && otyp != TOWEL))
+#ifdef PHOTOGRAPHY
+		|| (!strcmp(word, "write on") &&
+			(otyp==SCR_PHOTOGRAPH || otyp==SPE_PHOTO_ALBUM))
+#endif
 		|| (!strcmp(word, "tin") &&
 		    (otyp != CORPSE || !tinnable(otmp)))
 		|| (!strcmp(word, "rub") &&
@@ -889,6 +893,9 @@ register const char *let,*word;
 		      !objects[POT_OIL].oc_name_known)) ||
 		     (otmp->oclass == FOOD_CLASS &&
 		      otyp != CREAM_PIE && otyp != EUCALYPTUS_LEAF) ||
+#ifdef PHOTOGRAPHY
+			(otmp->oclass==SPBOOK_CLASS && otyp!=SPE_PHOTO_ALBUM) ||
+#endif
 		     (otmp->oclass == GEM_CLASS && !is_graystone(otmp))))
 		|| (!strcmp(word, "invoke") &&
 		    (!otmp->oartifact && !objects[otyp].oc_unique &&
@@ -902,6 +909,11 @@ register const char *let,*word;
 		|| (!strcmp(word, "untrap with") &&
 		    (otmp->oclass == TOOL_CLASS && otyp != CAN_OF_GREASE))
 		|| (!strcmp(word, "charge") && !is_chargeable(otmp))
+#ifdef PHOTOGRAPHY
+		|| (!strcmp(word, "zap") &&
+			otmp->oclass==TOOL_CLASS && otyp!=EXPENSIVE_CAMERA)
+		|| (!strcmp(word, "set the timer on") && otyp!=EXPENSIVE_CAMERA)
+#endif
 		    )
 			foo--;
 		/* ugly check for unworn armor that can't be worn */
@@ -2571,7 +2583,14 @@ long numused;
  */
 STATIC_VAR NEARDATA const char *names[] = { 0,
 	"Illegal objects", "Weapons", "Armor", "Rings", "Amulets",
-	"Tools", "Comestibles", "Potions", "Scrolls", "Spellbooks",
+	"Tools", "Comestibles", "Potions",
+#ifdef PHOTOGRAPHY
+	"Scrolls/Photos",
+	"Books",
+#else
+	"Scrolls",
+	"Spellbooks",
+#endif
 	"Wands", "Coins", "Gems", "Boulders/Statues", "Iron balls",
 	"Chains", "Venoms"
 };

@@ -143,6 +143,9 @@ demon_talk(mtmp)		/* returns 1 if it won't attack. */
 register struct monst *mtmp;
 {
 	long cash, demand, offer;
+#ifdef PHOTOGRAPHY
+	struct obj *glossy;
+#endif
 
 	if (uwep && uwep->oartifact == ART_EXCALIBUR) {
 	    pline("%s looks very angry.", Amonnam(mtmp));
@@ -199,6 +202,18 @@ register struct monst *mtmp;
 		return 0;
 	    }
 	}
+#ifdef PHOTOGRAPHY
+	/* a nice souvenir*/
+	glossy = mksobj(SCR_PHOTOGRAPH,FALSE,FALSE);
+	glossy = expose_film(glossy,0,mtmp->mx,mtmp->my,0,0,0,1,TRUE,OBJ_FLOOR);
+	PHOTOGRAPH(glossy)->autographed = AUTOGRAPH_COWARD;
+	pline("%s %s %s your %s!", Something,
+	  Blind ? "lands" : "appears",
+	  Levitation ? "beneath" : "at",
+	  makeplural(body_part(FOOT)));
+	curse(glossy);
+	dropy(glossy);
+#endif
 	mongone(mtmp);
 	return(1);
 }

@@ -1495,6 +1495,9 @@ struct ext_func_tab extcmdlist[] = {
 #endif
 	{"rub", "rub a lamp or a stone", dorub, FALSE},
 	{"sit", "sit down", dosit, FALSE},
+#ifdef PHOTOGRAPHY
+	{"timer", "set timer on a camera", use_camera_timer, FALSE},
+#endif
 	{"turn", "turn undead", doturn, TRUE},
 	{"twoweapon", "toggle two-weapon combat", dotwoweapon, FALSE},
 	{"untrap", "untrap something", dountrap, FALSE},

@@ -89,6 +89,10 @@ struct conditionals {
 #ifndef MAIL
 	{ OBJ_GLYPH, SCR_STINKING_CLOUD+4, "stamped / mail" },
 #endif
+#ifndef PHOTOGRAPHY
+	{ OBJ_GLYPH, SCR_PHOTOGRAPH, "photograph" },
+	{ OBJ_GLYPH, SPE_PHOTO_ALBUM, "photo album" },
+#endif
 	{ 0, 0, 0}
 };
 

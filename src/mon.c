@@ -1479,7 +1479,15 @@ register struct monst *mtmp;
 	    }
 	}
 #endif
-	if(mtmp->iswiz) wizdead();
+	if(mtmp->iswiz) {
+#ifdef PHOTOGRAPHY
+		if(!u.uevent.udemigod) {
+			place_object(make_special_photo(PHOTO_SPECIAL_WIZ),
+				mtmp->mx, mtmp->my);
+		}
+#endif
+		wizdead();
+	}
 	if(mtmp->data->msound == MS_NEMESIS) nemdead();
 	if(glyph_is_invisible(levl[mtmp->mx][mtmp->my].glyph))
 	    unmap_object(mtmp->mx, mtmp->my);

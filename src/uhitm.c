@@ -2458,43 +2458,64 @@ struct monst *mon;
 	u.umconf--;
 }
 
+static const char flash_awakens[] = "flash awakens %s.";
+static const char blinded_by_the_flash[] = "blinded by the flash!";
+
 int
 flash_hits_mon(mtmp, otmp)
 struct monst *mtmp;
 struct obj *otmp;	/* source of flash */
 {
-	int tmp, amt, res = 0, useeit = canseemon(mtmp);
+	int tmp, amt, res = 0;
+	boolean isyou = (mtmp==&youmonst);
+	boolean useeit = canseemon(mtmp) && !isyou;
 
-	if (mtmp->msleeping) {
+	if (isyou && u.usleep) {
+		multi = -1;
+		nomovemsg = "The flash awakens you.";
+		res = 1;
+	} else if (!isyou && mtmp->msleeping) {
 	    mtmp->msleeping = 0;
 	    if (useeit) {
-		pline_The("flash awakens %s.", mon_nam(mtmp));
+		pline_The(flash_awakens, mon_nam(mtmp));
 		res = 1;
 	    }
 	} else if (mtmp->data->mlet != S_LIGHT) {
 	    if (!resists_blnd(mtmp)) {
 		tmp = dist2(otmp->ox, otmp->oy, mtmp->mx, mtmp->my);
 		if (useeit) {
-		    pline("%s is blinded by the flash!", Monnam(mtmp));
+		    pline("%s is %s", Monnam(mtmp),blinded_by_the_flash);
 		    res = 1;
+		} else if (isyou) {
+			You("are %s",blinded_by_the_flash);
+			res = 1;
 		}
 		if (mtmp->data == &mons[PM_GREMLIN]) {
 		    /* Rule #1: Keep them out of the light. */
-		    amt = otmp->otyp == WAN_LIGHT ? d(1 + otmp->spe, 4) :
-		          rn2(min(mtmp->mhp,4));
-		    pline("%s %s!", Monnam(mtmp), amt > mtmp->mhp / 2 ?
-			  "wails in agony" : "cries out in pain");
-		    if ((mtmp->mhp -= amt) <= 0) {
-			if (flags.mon_moving)
-			    monkilled(mtmp, (char *)0, AD_BLND);
-			else
-			    killed(mtmp);
-		    } else if (cansee(mtmp->mx,mtmp->my) && !canspotmon(mtmp)){
-			map_invisible(mtmp->mx, mtmp->my);
-		    }
+		    amt = otmp->otyp == WAN_LIGHT ? d(1 + otmp->spe, 4) : rn2(4);
+			if(isyou) {
+				You("writhe in agony!");
+				losehp(amt, "flash of light", KILLED_BY_AN);
+			} else {
+				pline("%s %s!", Monnam(mtmp), amt > mtmp->mhp / 2 ?
+				"wails in agony" : "cries out in pain");
+				if ((mtmp->mhp -= amt) <= 0) {
+				if (flags.mon_moving)
+					monkilled(mtmp, (char *)0, AD_BLND);
+				else
+					killed(mtmp);
+				} else if (cansee(mtmp->mx,mtmp->my) && !canspotmon(mtmp)){
+				map_invisible(mtmp->mx, mtmp->my);
+				}
+			}
 		}
-		if (mtmp->mhp > 0) {
-		    if (!flags.mon_moving) setmangry(mtmp);
+		amt = tmp==0 ? rnd(100) : rnd(1 + 50/tmp);
+		if(isyou) {
+			make_blinded((long)amt, FALSE);
+			if(otmp->where==OBJ_INVENT) makeknown(otmp->otyp);
+			if (!Blind) Your(vision_clears);
+		} else if (mtmp->mhp > 0) {
+		    if (!flags.mon_moving && otmp->where==OBJ_INVENT) setmangry(mtmp);
 		    if (tmp < 9 && !mtmp->isshk && rn2(4)) {
 			if (rn2(4))
 			    monflee(mtmp, rnd(100), FALSE, TRUE);
@@ -2502,7 +2523,7 @@ struct obj *otmp;	/* source of flash */
 			    monflee(mtmp, 0, FALSE, TRUE);
 		    }
 		    mtmp->mcansee = 0;
-		    mtmp->mblinded = (tmp < 3) ? 0 : rnd(1 + 50/tmp);
+		    mtmp->mblinded = amt;
 		}
 	    }
 	}
