@@ -1921,10 +1921,95 @@ dodip()
 		return(1);
 	}
 
+	if (potion->otyp == POT_FRUIT_JUICE && obj->otyp == CORPSE) {
+	    switch (obj->corpsenm) {
+	    case PM_BROWN_MOLD:
+	    case PM_GREEN_MOLD:
+	    case PM_YELLOW_MOLD:
+	    case PM_RED_MOLD:
+	    case PM_VIOLET_FUNGUS:
+		/* MRKR: Molds and fungi have various medicinal properties */
+
+		pline("%s %s.", The(cxname(obj)), otense(obj, "dissolve"));
+		potion->corpsenm = obj->corpsenm;
+		useup(obj);
+		/* fermentation takes a while... */
+		start_timer(50 + rn2(50), TIMER_OBJECT,
+			    FERMENT, (genericptr_t)potion);
+		break;
+	    }
+	}
+
 	pline("Interesting...");
 	return(1);
 }
 
+void
+ferment(arg, timeout)
+genericptr_t arg;
+long timeout;
+{
+    struct obj *potion = (struct obj *)arg;
+    boolean need_newsym;
+    xchar x, y;
+    char whose[BUFSZ];
+    short new_otyp;
+
+    if (!potion) {
+#ifdef DEBUG
+	    pline("null potion in ferment()");
+#endif
+	    return;
+    }
+
+    /* Make sure it hasn't been transformed in the meantime */
+    if (potion->otyp != POT_FRUIT_JUICE) return;
+
+    switch (potion->corpsenm) {
+    case PM_BROWN_MOLD:
+	new_otyp = POT_BOOZE;
+	break;
+    case PM_GREEN_MOLD:
+	new_otyp = POT_HEALING;
+	break;
+    case PM_YELLOW_MOLD:
+	new_otyp = POT_CONFUSION;
+	break;
+    case PM_RED_MOLD:
+	new_otyp = POT_SLEEPING;
+	break;
+    case PM_VIOLET_FUNGUS:
+	new_otyp = POT_HALLUCINATION;
+	break;
+    default:
+	impossible("Strange yeast! (%d)", potion->corpsenm);
+	break;
+    }
+
+    need_newsym = FALSE;
+    if (get_obj_location(potion, &x, &y, 0) && !Blind && cansee(x, y)) {
+	/* set up `whose[]' to be "Your" or "Fred's" or "The goblin's" */
+	(void) Shk_Your(whose, potion);
+	switch (potion->where) {
+	case OBJ_INVENT:
+	case OBJ_MINVENT:
+	    pline("%s %s %s.",
+		  whose, aobjnam(potion, "turn"),
+		  hcolor(OBJ_DESCR(objects[new_otyp])));
+	    break;
+	case OBJ_FLOOR:
+	    You("see %s turn %s.",
+		(potion->quan > 1 ?
+		 an(aobjnam(potion, NULL)) : aobjnam(potion, NULL)),
+		hcolor(OBJ_DESCR(objects[new_otyp])));
+	    break;
+	    need_newsym = TRUE;
+	}
+    }
+    potion->otyp = new_otyp;
+    if (need_newsym) newsym(x, y);
+
+}
 
 void
 djinni_from_bottle(obj)

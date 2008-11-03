@@ -2371,6 +2371,11 @@ mergable(otmp, obj)	/* returns TRUE if obj  & otmp can be merged */
 	if (obj->otyp == POT_OIL && obj->lamplit)
 	    return FALSE;
 
+	/* fermenting potions don't merge */
+	if (obj->otyp == POT_FRUIT_JUICE) {
+	    if (obj->corpsenm || otmp->corpsenm) return FALSE;
+	}
+
 	/* don't merge surcharged item with base-cost item */
 	if (obj->unpaid && !same_price(obj, otmp))
 	    return FALSE;
